@@ -1,0 +1,129 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    border-collapse: collapse;
+    overflow: hidden;
+    scrollbar-width: thin;
+}
+main {
+    scrollbar-gutter: stable;
+    overflow-y: auto;
+}
+
+header {
+    height: 10vh;
+    background-color: bisque;
+}
+footer {
+    height: 10vh;
+    background-color: bisque;
+}
+main {
+    height: 80vh;
+    background-color: antiquewhite;
+}
+
+h1 {
+    text-align: center;
+}
+
+p, label {
+    font-family: sans-serif;
+}
+
+form {
+    display: grid;
+    grid-template-rows: auto repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+    overflow-x: scroll;
+}
+fieldset {
+    min-width: 412px;
+    width: 48.5vw;
+    margin-left: 1vw;
+    height: 37vh;
+}
+#buttons-div {
+    height: 10vh;
+    width: 100vw;
+}
+.field-input {
+    display: grid;
+    grid-template-columns: auto repeat(5, 1fr);
+    grid-template-rows: repeat(8, 0.4rem);
+    grid-auto-flow: column;
+    grid-gap: 1rem;
+}
+.field-input > *  {
+    max-width: 20vw;
+    min-width: 125px;
+    height: 20px;
+}
+
+.txt-bulk {
+    display: block;
+    margin-block-start: 20px;: ;
+    width: 20vw;
+    height: 50px;
+}
+.field-bulk-input label {
+    display: block;
+    width: 20vw;
+    height: fit-content;
+}
+
+button {
+    cursor: pointer;
+    margin-left: 0.1vw;
+}
+
+button:first-child {
+    margin-left: 1vw;
+}
+#btn-continue {
+    width: 20vw;
+    min-width: fit-content;
+    height: 5vh;
+    min-height: fit-content;
+    transform: translate(calc(-50% + 50vw));
+}
+
+.hidden {
+    display: none;
+}
+
+/******************** INVENTORY PAGE ********************/
+
+section.inventory {
+    position: relative;
+    left: 5vw;
+    width: 130px;
+    border-top: 1px solid black;
+}
+
+main.inventory {
+    display: grid;
+    grid-template-rows: auto repeat(2, 10vw);
+    grid-template-columns: repeat(2, 10vh);
+    grid-auto-flow: row;
+}
+
+div.inventory {
+    position: relative;
+    width: 100%;
+    padding-top: 16px;
+    border-bottom: 1px solid black;
+
+}
+#ingredients div {
+    border-left: 1px solid black;
+}
+#dates div {
+    border-inline: 1px solid black;
+}
+
+p.inventory {
+    text-align: left;
+    padding-left: 3px;
+}

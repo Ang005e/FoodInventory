@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Smart Meal Planner</title>
+        <link rel="stylesheet" href="css/theme.css">
+        <script src="js/main.js" defer="defer"></script>
+        <script src="js/algorithm.js" defer="defer"></script>
+        <script src="js/recipes.js" defer="defer"></script>
+    </head>
+    <body>
+        <header>
+            <h1>Smart Meal Planner</h1>
+        </header>
+        <main>
+
+            <div id="field-buttons">
+                <button type="button" id="btn-add-input" class="btn-ingredient">Add Ingredient +</button>
+                <button type="button" id="btn-remove-input" class="btn-ingredient">Remove Ingredient</button>
+                <button type="button" id="btn-remove-all" class="btn-ingredient">REMOVE ALL INGREDIENTS</button>
+            </div>
+            <form id="frm-ingredient">
+
+
+                <fieldset id="field-ingredient" class="field-input">
+                    <label>Input Ingredient:</label>
+                </fieldset>
+
+                <fieldset id="field-date" class="field-input">
+                    <label>Input Use-By Date:</label>
+                </fieldset>
+
+                <fieldset id="field-bulk-ingredient" class="field-bulk-input">
+                    <label for="txt-bulk-input">Input Comma-Seperated Ingredients:</label>
+                    <input type="text" id="txt-bulk-input" name="txt-bulk-input" class="txt-bulk">
+                </fieldset>
+
+                <fieldset id="field-bulk-date" class="field-bulk-input">
+                    <label for="txt-bulk-date">Input Comma-Seperated Dates:</label>
+                    <input type="text" id="txt-bulk-date" name="txt-bulk-date" class="txt-bulk">
+                </fieldset>
+            </form>
+        </main>
+    <footer>
+      <p>Copyright Jones, Jones & Jones, 2050</p>
+        <button type="button" id="btn-continue" class="btn-ingredient">> Save And Continue ></button>
+    </footer>
+
+    </body>
+</html>
