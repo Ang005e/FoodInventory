@@ -9,7 +9,7 @@ if (pageName('inventory')) {
     })
 }
 
-function pageLoad() {
+function pageLoad() { // main code. runs on page load/reload
     let displayValues = getIngredients(); // the (sorted and cleaned) array of ingredient and date pairs, ready for display
     console.log(displayValues);
 
@@ -35,33 +35,45 @@ function pageLoad() {
         elemContainer.appendChild(elem);
         parentElem.appendChild(elemContainer);
         elem.innerText = displayValue.toString();
-        //parentElem.append(elemContainer);
-
     })
-
-
-} // main code. runs on page load/reload
-
-function recipeTemplate(ingredients) {
-
 }
 
+function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
+    // either combined or individual formats.
+    // ToDo: ensure the values stored are not '' (not in this func – do in main.js)
+    let valuePairs = [[], []]; // I get off on confusing people who try to understand my code
+    let combinedValues = []
+    let iterationCount = inputElemIdIndex('stored', false);
+
+    for (let i = 1; i <= iterationCount; i++) {
+        let inputValue = storageAction('get', `txt-input${i}`).trim();
+        isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
+        combinedValues.push(inputValue); // populate a single array with ingredient/date values
+    }
+    if (ingredient){return valuePairs[1]}
+    else if (date) {return valuePairs[0]}
+    return combinedValues;
+}
+
+function recipeTemplate(ingredients) {
+    //ToDo: create a list of recipes that can be checked against a list of ingredients
+}
+
+/*
+still quite chuffed with this sly use of arrays, even though it's useless now.
 function getIngredients() {
     let ingredients = [];
     let numIterations = [handleBulkInput(), inputElemIdIndex('stored', false)]; // this
     // is an array with items that refer to the number of storage items in each separate storage-key-naming-scheme (i.e.
     // bulkInput(index) or txtInput(index). The array stores the (index) part). It's used to gracefully manipulate localStorage
 
-
     numIterations.forEach(iteration => { // for each 'index array':
         let keyTemplate = (iteration === numIterations[0] ? 'bulk-input' : 'txt-input')
-
         for (let i = 1; i <= iteration; i++) {
             let ingredient = storageAction('get', `${keyTemplate}${i}`)
             ingredients[ingredients.length] = (ingredient !== null ? ingredient.trim() : ingredients.splice(i, 1));
         }
     })
-
     return ingredients;
-} // get all the user-entered ingredients, format them, and return them.
-
+}
+*/

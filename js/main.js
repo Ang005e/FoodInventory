@@ -231,8 +231,9 @@ function repopulatePage() { // repopulates the elements on the page when the use
 function inputElemIdIndex(returnIndex = 'current', refreshStoredIndex = true) {
     if (refreshStoredIndex) {
 
-        let inputElems = document.querySelectorAll('.single-input');
-        storageAction('store', 'input-fields-count', (localStorage.length).toString());
+        let i = -1;
+        for (let key in localStorage) {/txt-input/g.test(key) ? i++ : 0}
+        storageAction('store', 'input-fields-count', (++i).toString())
     }
     switch (returnIndex) {
         case 'current':
