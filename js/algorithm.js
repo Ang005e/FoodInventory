@@ -9,33 +9,24 @@ if (pageName('inventory')) {
     })
 }
 
-function pageLoad() { // main code. runs on page load/reload
-    let displayValues = getIngredients(); // the (sorted and cleaned) array of ingredient and date pairs, ready for display
-    console.log(displayValues);
-
-    displayValues.forEach(displayValue => {
-        // let arrayPosition = displayValues.indexOf(displayValue)
-        let parentElem;
-        let i = displayValues.indexOf(displayValue);
-
-        // Value is valid, and has not been wiped?
-        if (displayValue.length === 0) {return}
-
-        // value is for ingredient or date section?
-        if (!isEven(++i)) {
-            parentElem = document.querySelector('#ingredients')
-        } else if (isEven(i)) {
-            parentElem = document.querySelector('#dates');
-        }
-
+function pageLoad() { // Main code. Runs on page load/reload. Populates elems with ingredients and use-by-dates.
+    getIngredients(true).forEach((value) => {
+        let parentElem = document.querySelector('#ingredients');
+        createDiv(parentElem).innerText = value.toString();
+    })
+    getIngredients(false, true).forEach((value) => {
+        let parentElem = document.querySelector('#dates');
+        createDiv(parentElem).innerText = value.toString();
+    })
+    function createDiv(parentElem) {
         let elemContainer = document.createElement('div');
         let elem = document.createElement('p');
         elemContainer.classList.add('display-div', 'inventory')
         elem.classList.add('inventory')
         elemContainer.appendChild(elem);
         parentElem.appendChild(elemContainer);
-        elem.innerText = displayValue.toString();
-    })
+        return elem;
+    }
 }
 
 function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
