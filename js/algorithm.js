@@ -46,10 +46,6 @@ function getIngredients(ingredient, date) { // get all the user-entered ingredie
     return combinedValues;
 }
 
-function recipeTemplate(ingredients) {
-    //ToDo: create a list of recipes that can be checked against a list of ingredients
-}
-
 /*
 still quite chuffed with this sly use of arrays, even though it's useless now.
 function getIngredients() {
