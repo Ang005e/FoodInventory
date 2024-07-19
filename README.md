@@ -9,7 +9,7 @@ They can be added or removed at any time, and are stored in local storage on you
 Many other plans are in the pipeline for this project, including 
 
 1. Display recipe matches (and close matches).
-2. Certain critical code components... i.e., Error Handling (kill me), and user notifications when an incorrect input is added.
+2. ~~Certain critical code components... i.e., Error Handling, and user notifications when an incorrect input is added.~~
 3. Ingredient view filters (i.e., what needs using most urgently?).
 4. A stinkout alert (and critical alerts for CERTAIN ingredients), when an item goes off.
 5. A full weekly meal template, based on various diet styles, with what's already in ya fridge.
