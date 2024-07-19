@@ -4,10 +4,20 @@ let type;
 let usePriority;
 
 function recipeTemplate(ingredients) {
-    //ToDo: create a list of recipes that can be checked against a list of ingredients
+    //ToDo: create a list of recipes that can be used to check against a list of ingredients.
+    // Use boolean values (for each ingredient) and switch from true to false if a match is made.
+    // The booleans could be stored in an array, and it could be checked after the match for any false values
+
+    // Additionally, there could be an algorithm to check if a recipe is ALMOST made, then a value to tell
+    // if an ingredient is vital to the recipe, or can be substituted.
+
+    // Categories for each recipe?
+
 }
 
-switch (ingredient)  { //ToDo: add additional details to each matched ingredient
+switch (ingredient)  {
+    //ToDo: make a list of regularly-used ingredients.
+    // could also add additional details to each matched ingredient
     case 'corn-chips':
         type = 'tinned/dried';
         usePriority = 'low';
