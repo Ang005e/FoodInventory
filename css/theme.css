@@ -27,9 +27,21 @@ main {
 h1 {
     text-align: center;
 }
-
 p, label {
     font-family: sans-serif;
+}
+#alert-div {
+    position: relative;
+    height: 4vh;
+    margin-top: 1vh;
+    padding-top: 0.5vh;
+    border-radius: 2rem;
+    border: 0.2rem solid black;
+    background-color: red;
+    font-family: Verdana, Tahoma, sans-serif;
+    font-size: 1.2rem;
+    text-align: center;
+    transition: opacity 1s cubic-bezier(1, 0.9, 0.3, 1);
 }
 
 form {
@@ -90,7 +102,7 @@ button:first-child {
 }
 
 .hidden {
-    display: none;
+    opacity: 0;
 }
 
 /******************** INVENTORY PAGE ********************/

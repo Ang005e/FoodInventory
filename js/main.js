@@ -4,6 +4,7 @@
 // ****** GLOBALS ******
 
 let _focusedElem;
+let timeoutPromise;
 //get fked globals
 
 
@@ -36,67 +37,75 @@ function focusListener(elem) { // Adds listeners to allow users to manipulate se
 
 function eventCentre(event) {
     // Centralises and manages events, and makes it MUCH easier to debug and understand.
-
-    console.log(event.type);
-
-    switch(event.type) {
-        case 'DOMContentLoaded':
-            repopulatePage();
-            return;
-
-        case 'keypress':
-            if ((event.key !== 'Enter') && (event.key !== undefined)) {return}
-            // must be the enter key used on an ingredient/date field, so:
-
-            if (event.target.className === 'txt-bulk') {
-                storeInputValue(event, event.target, true);
-                document.querySelector('#txt-bulk-date').focus()
-            }
-            let issue = storeInputValue(event, event.target);
-            if (issue) {return alertUser('Empty or incomplete value entered!')}
-            if (event.target.id === 'btn-add-input') {
-                return createElem(inputElemIdIndex()+1);
-            }
-            break;
-        case 'focus':
-            _focusedElem = event.target.id;return;
-    }
-
-    let elem = document.querySelector(`#txt-input${inputElemIdIndex('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
-    let issue;
-    let skipCreation = false;
-
-    switch(event.target.id) {
-        case 'btn-add-input':
-
-            if (nullElem(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
-                createElem(inputElemIdIndex()+1);
+    try {
+        console.log(event.type);
+        switch (event.type) {
+            case 'DOMContentLoaded':
+                repopulatePage();
                 return;
-            }
-            issue = storeInputValue(event, elem);
-            if (issue) {return}
-            break;
 
-        case 'btn-remove-input':
-            try {
-                removeInputPair(_focusedElem);
-            } catch {
-                removeInputPair(elem);
-            }
-            return;
-        case 'btn-remove-all':
-            storageAction('clear_all', undefined);
-            inputElemIdIndex('none', true);
-            removeAllInputs();
-            return;
-        case 'btn-continue':
-            storeInputValue(event, elem);
-            skipCreation = true;
-            location.href = 'inventory.html';
-            return;
+            case 'keypress':
+
+                if ((event.key !== 'Enter') && (event.key !== undefined)) {
+                    return
+                }
+                // must be the enter key used on an ingredient/date field or btn-add-input, so:
+
+                if (event.target.id === 'btn-add-input') {
+                    return createInput(inputElemIdIndex() + 1);
+                }
+                if (event.target.className === 'txt-bulk') {
+                    storeInputValue(event, event.target, true);
+                    document.querySelector('#txt-bulk-date').focus()
+                }
+                let issue = storeInputValue(event, event.target);
+                if (issue) {return}
+                break;
+            case 'focus':
+                _focusedElem = event.target.id;
+                return;
+        }
+
+        let elem = document.querySelector(`#txt-input${inputElemIdIndex('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
+        let issue;
+        let skipCreation = false;
+
+        switch (event.target.id) {
+            case 'btn-add-input':
+
+                if (nullElem(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
+                    createInput(inputElemIdIndex() + 1);
+                    return;
+                }
+                issue = storeInputValue(event, elem);
+                if (issue) {
+                    return
+                }
+                break;
+
+            case 'btn-remove-input':
+                try {
+                    removeInputPair(_focusedElem);
+                } catch {
+                    removeInputPair(elem);
+                }
+                return;
+            case 'btn-remove-all':
+                storageAction('clear_all', undefined);
+                inputElemIdIndex('none', true);
+                removeAllInputs();
+                return;
+            case 'btn-continue':
+                storeInputValue(event, elem);
+                skipCreation = true;
+                location.href = 'inventory.html';
+                return;
+        }
+        // once the above has been completed, create the new element
+        (skipCreation === false) && (createInput(inputElemIdIndex() + 1))
+    } catch (e) {
+        errorPrinter(e)
     }
-    // once the above has been completed, create the new element
-    (skipCreation===false) && (createElem(inputElemIdIndex()+1))
 }
 
 
@@ -108,7 +117,7 @@ function removeAllInputs() {
     });
 }
 
-function createElem(idIndex) { // Create and configure empty input element
+function createInput(idIndex) { // Create and configure empty input element
     if (inputElemIdIndex() !== 46) {
         if (isEven(inputElemIdIndex())) {
             setFieldsetInput('input', 1, '', ['type', 'class', 'id', 'placeholder'], ['text', 'ingredient-input single-input', `txt-input${idIndex}`, '[Ingredient]'] );
@@ -144,50 +153,45 @@ function setFieldsetInput(element, fieldsetNum, text = '', attributes=[], values
     }
 }
 
-//ToDo: create an alert for the user
 function alertUser(message) {
-    let alertDiv = document.createElement('div');
-    setElemAttribute(alertDiv, 'height', '25vh');
-    setElemAttribute(alertDiv, 'width', '20vw');
-    setElemAttribute(alertDiv, 'font-size', '10px');
-    alertDiv.innerText = message;
+    let alertDiv = document.querySelector('#alert-div');
+    alertDiv.innerHTML = '';
+    alertDiv.innerHTML = message;
+    alertDiv.classList.remove('hidden')
+    clearTimeout(timeoutPromise);
+    timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
 }
 
 function storeInputValue(event, elem, bulk = false) { // takes an event and an elem as arguments,
     // and prepares values for use with storageAction. Also refreshed the id index system.
     event.preventDefault();
-
-    if (elem===null) {console.warn('ELEMENT: NO HANDLE FOUND');return}//screw readability im lazy
-    // screw commas too
-
-    if ((elem.type === 'date') && (elem.value === '')) { // if the date value is empty (has not been completed)
-        alertUser('Inappropriate date entered – either empty or incomplete');
-        return true;
-    }
-    if ((elem.value === '') || (elem.value === null)) {
-        alertUser('A value must be entered before creating a new field!')
-        return true;
-    }
     console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
-
-    if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
-        elem.forEach(elem => {
-            storageAction('store', elem.id, elem.value);setElemAttribute(elem);
-        })
-
-    } else if (bulk) {
-        if (event.target.value !== undefined) {
-            event.target.value.split(',').forEach(text => {
-                storageAction('store', `txt-input${inputElemIdIndex('stored', true)+1}`, text);
-            });
+    try {
+        if (elem.value === '') {
+            throw TypeError('Provided value is not of the correct format')
+        }
+        if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
+            elem.forEach(elem => {
+                storageAction('store', elem.id, elem.value);
+                setElemAttribute(elem);
+            })
+        } else if (bulk) {
+            if (event.target.value !== undefined) {
+                event.target.value.split(',').forEach(text => {
+                    storageAction('store', `txt-input${inputElemIdIndex('stored', true) + 1}`, text);
+                });
+                setElemAttribute(elem);
+            }
+        } else { // passed in as a single elem? do:
+            storageAction('store', elem.id, elem.value);
             setElemAttribute(elem);
         }
+        inputElemIdIndex('none', true);
+    }catch (e) {
+        errorPrinter(e);
+        if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
+        return true;
     }
-    else { // passed in as a single elem? do:
-        storageAction('store', elem.id, elem.value);setElemAttribute(elem);
-    }
-
-    inputElemIdIndex('none', true);
 }
 
 function setElemAttribute(elem, attribute='readonly', value='readonly') {
@@ -195,7 +199,10 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
         if (!elem.hasAttribute(attribute)) {
             elem.setAttribute(attribute, value);
         }
-    }catch {console.log('event not linked with an item entry')}
+    }catch (e) {
+        errorPrinter(e);
+        console.log('event may not be linked with an item entry')
+    }
 }
 
 function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
@@ -273,7 +280,7 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
         try {
             storageAction('clear', `txt-input${elemIdNum}`);
             document.querySelector(`#txt-input${elemIdNum}`).remove()
-        }catch (e) {console.warn(e)}
+        }catch (e) {errorPrinter(e)}
 
     })
 
@@ -317,7 +324,7 @@ function getInputIdNum(inputElemId) { // returns the numeric index assigned to m
         console.log(inputElemId.split('t')[3])
         return parseInt(inputElemId.split('t')[3]);
     }catch (e) {
-        console.error('Issue in getInputIdNum. ', e);
+        errorPrinter(e);
         return null;
     }
 }
@@ -338,4 +345,10 @@ function isEven(value) {
 
 function pageName(page) {
     return document.location.pathname.includes(`${page}.html`);
+}
+function errorPrinter(e) { // this has to be ultimate lazy programming (aka modularity)
+    let startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
+    // (must be the function that the error happened in)
+    let functionName = startPos.substring(0, startPos.search(/\(/));
+    console.warn('Error in function ' + functionName.trim() + '()');
 }
