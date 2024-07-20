@@ -12,7 +12,7 @@ class Recipe {
         try {
             let matches = 0;
             queriedIngredients.forEach(queriedIngredient => matches = this.iterateIngredients(queriedIngredient, matches))
-            console.log(`Matches: ${matches}/${this.ingredients.length}`);
+            console.log(`${this.valueOf()}Matches: ${matches}/${this.ingredients.length}`);
             return matches === this.ingredients.length // all ingredients have been matched correctly?
         }
         catch(e) {errorPrinter(e); return false;}
