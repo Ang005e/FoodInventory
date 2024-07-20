@@ -31,7 +31,6 @@ function pageLoad() { // Main code. Runs on page load/reload. Populates elems wi
 
 function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
     // either combined or individual formats.
-    // ToDo: ensure the values stored are not '' (not in this func – do in main.js)
     let valuePairs = [[], []]; // I get off on confusing people who try to understand my code
     let combinedValues = []
     let iterationCount = inputElemIdIndex('stored', false);
@@ -41,7 +40,7 @@ function getIngredients(ingredient, date) { // get all the user-entered ingredie
         isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
         combinedValues.push(inputValue); // populate a single array with ingredient/date values
     }
-    if (ingredient){return valuePairs[1]}
+    if (ingredient) {return valuePairs[1]}
     else if (date) {return valuePairs[0]}
     return combinedValues;
 }

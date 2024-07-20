@@ -117,7 +117,7 @@ section.inventory {
 main.inventory {
     display: grid;
     grid-template-rows: auto repeat(2, 10vw);
-    grid-template-columns: repeat(2, 10vh);
+    grid-template-columns: repeat(2, fit-content(100%));
     grid-auto-flow: row;
 }
 
@@ -126,16 +126,16 @@ div.inventory {
     width: 100%;
     padding-top: 16px;
     border-bottom: 1px solid black;
-
 }
 #ingredients div {
     border-left: 1px solid black;
+    min-width: fit-content;
 }
 #dates div {
     border-inline: 1px solid black;
 }
-
 p.inventory {
     text-align: left;
     padding-left: 3px;
+    width: fit-content;
 }

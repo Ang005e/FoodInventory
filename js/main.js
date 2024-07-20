@@ -165,8 +165,8 @@ function alertUser(message) {
 function storeInputValue(event, elem, bulk = false) { // takes an event and an elem as arguments,
     // and prepares values for use with storageAction. Also refreshed the id index system.
     event.preventDefault();
-    console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
     try {
+        console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
         if (elem.value === '') {
             throw TypeError('Provided value is not of the correct format')
         }
