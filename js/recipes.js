@@ -1,21 +1,47 @@
-let nachos = ['corn chips', 'red kidney beans', ]
-let ingredient;
 let type;
 let usePriority;
 
-function recipeTemplate(ingredients) {
-    //ToDo: create a list of recipes that can be used to check against a list of ingredients.
-    // Use boolean values (for each ingredient) and switch from true to false if a match is made.
-    // The booleans could be stored in an array, and it could be checked after the match for any false values
+class Recipe {
+    constructor(ingredients, category, useDays, prepTime) {
+        this.ingredients = ingredients;
+        this.catergory = category;
+        this.useDays = useDays;
+        this.prepTime = prepTime;
+    }
+    match(queriedIngredients = ['']) { // takes queries in string array format and calls matchIngredient() for each string
+        try {
+            let matches = 0;
+            queriedIngredients.forEach(queriedIngredient => matches = this.iterateIngredients(queriedIngredient, matches))
+            console.log(`Matches: ${matches}/${this.ingredients.length}`);
+            return matches === this.ingredients.length // all ingredients have been matched correctly?
+        }
+        catch(e) {errorPrinter(e); return false;}
+    }
+    iterateIngredients(queriedIngredient, matches) {
+        this.ingredients.forEach((ingredient) => {
+            if (RegExp(ingredient, 'i').test(queriedIngredient)) {matches++}
+        })
+        return matches;
+    }
+}
+
+const nachos = new Recipe(['corn-chips', 'mexican-beans', 'spices']);
+const potatoSoup = new Recipe(['potato', 'leek', 'chives', 'milk']);
+
+let x = nachos.match(['mexican-beans', 'garlic', 'corn-chips', 'spices', 'milk']);
+console.log(x);
+
+function recipes() {
+    //ToDo: check recipe objects against a list of ingredients.
 
     // Additionally, there could be an algorithm to check if a recipe is ALMOST made, then a value to tell
     // if an ingredient is vital to the recipe, or can be substituted.
 
     // Categories for each recipe?
-
 }
 
-switch (ingredient)  {
+/*
+switch (//ingredient)  {
     //ToDo: make a list of regularly-used ingredients.
     // could also add additional details to each matched ingredient
     case 'corn-chips':
@@ -35,3 +61,4 @@ switch (ingredient)  {
         usePriority = 'high';
         break;
 }
+*/
