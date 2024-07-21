@@ -51,10 +51,10 @@ form {
     display: grid;
     grid-template-rows: auto repeat(2, 1fr);
     grid-template-columns: repeat(2, 1fr);
-    overflow-x: scroll;
+    overflow-x: auto;
 }
 fieldset {
-    min-width: 412px;
+    min-width: 533px;
     width: 48.5vw;
     margin-left: 1vw;
     height: 37vh;

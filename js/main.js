@@ -4,7 +4,8 @@
 // ****** GLOBALS ******
 
 let _focusedElem;
-let timeoutPromise;
+let _timeoutPromise;
+let _dummyDataTest = false;
 //get fked globals
 
 
@@ -17,20 +18,43 @@ document.querySelectorAll('.btn-ingredient').forEach((elem)=> {
 
 document.addEventListener('keypress', (event) => eventCentre(event));
 
-if (pageName('index')) { // Populate index.html's elements with stored (previously entered) values
+// Populate index.html's elements with stored (previously entered) values
+if (pageName('index')) {
     document.addEventListener('DOMContentLoaded', (event) => {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
+        if (inputElemIdIndex('current', false)>47){
+            alertUser('Note: HTML god has decided to not not let me put dateTime values into date inputs when testing with dummy data.')
+
+        }
     })
 }
 
-function focusListener(elem) { // Adds listeners to allow users to manipulate selected input elements
+// Adds listeners to allow users to manipulate selected input elements
+function focusListener(elem) {
     if (elem instanceof Element) {
         elem.addEventListener('focus', (event) => eventCentre(event));
         return;
     }
     document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
 }
+
+try {
+    document.querySelector('#btn-test-population').addEventListener('click', (event) => {
+        _dummyDataTest = true
+        let i = 0;
+        let y = 0;
+        storageAction('clear-all', '');
+        allIngredients.forEach((ingredient)=> {
+            let x = Math.round(Math.random() * 10);
+            (y > 29) && (y=0);
+            storageAction('store', `txt-input${++i}`, ingredient.ingName)
+            storageAction('store', `txt-input${++i}`, `${++y}-${x}-${x}${x}${x}${x}`)
+        })
+        repopulatePage();
+        location.reload()
+    })
+}catch{}
 
 
 // ************ MAIN FUNCTION ************
@@ -82,7 +106,6 @@ function eventCentre(event) {
                     return
                 }
                 break;
-
             case 'btn-remove-input':
                 try {
                     removeInputPair(_focusedElem);
@@ -158,8 +181,8 @@ function alertUser(message) {
     alertDiv.innerHTML = '';
     alertDiv.innerHTML = message;
     alertDiv.classList.remove('hidden')
-    clearTimeout(timeoutPromise);
-    timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
+    clearTimeout(_timeoutPromise);
+    _timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
 }
 
 function storeInputValue(event, elem, bulk = false) { // takes an event and an elem as arguments,
@@ -225,7 +248,7 @@ function repopulatePage() { // repopulates the elements on the page when the use
             storageAction('clear', elemKeyId)
             storageAction('store', `txt-input${j}`, storedValue)
 
-            if (j === prevElems) {
+            if ((j === prevElems)&&(!_dummyDataTest)) {
                 !isEven(prevElems) ? storageAction('clear', `txt-input${j-1}`) : 0;
              } // if there's an ingredient elem at the end that's not paired with a date, delete it.
         }

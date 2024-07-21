@@ -1,6 +1,7 @@
 let allRecipes;
+let allIngredients;
 
-// ************** Recipe class ************** //
+// ************** CLASSES ************** //
 
 class Recipe {
     constructor(recipeName, ingredients, ingredientGroups, /* optionalIngredient, category, useDays, prepTime */) {
@@ -50,10 +51,19 @@ class Recipe {
     }
 }
 
+class Ingredient {
+    constructor(ingName, ingType, subType, alternateNames = []) {
+        this.ingName = ingName;
+        this.ingType = ingType;
+        this.subType = subType;
+        this.alternateNames = alternateNames;
+    }
+}
+
+
 // ************** Functions ************** //
 
 function loadRecipes(allRecipes) {
-    //ToDo: check recipe objects against a list of ingredients.
 
     let allIngredients = getIngredients(true);
 
@@ -73,7 +83,63 @@ const nachos = new Recipe('Nachos',
     ['corn chips', 'red kidney beans'],
     ['tomato passata|tomato paste']);
 
-const potatoSoup = new Recipe('Potato Soup', ['potatoes', 'milk', 'butter'],
+const potatoSoup = new Recipe('Potato Soup',
+    ['potatoes', 'milk', 'butter'],
     ['leek|chives|spring onion|parsley|basil']);
 
-allRecipes = [nachos, potatoSoup];
+const carrotSoup = new Recipe('Carrot Soup',
+    ['carrot', 'garlic', 'butter', 'milk'],
+    ['onion|shallot|leek']);
+
+const vegetableStirFry = new Recipe('Vegetable Stir-Fry',
+    ['garlic', 'mushroom', 'spring onion'],
+    ['carrot|broccoli', 'onion|shallot|spring onion']);
+
+const mushroomCheeseStuffedPotatoes = new Recipe('Mushroom Cheese Stuffed Potatoes',
+    ['potato', 'mushroom', 'cheese', 'butter', 'garlic', 'chives']);
+
+const broccoliCheeseBake = new Recipe('Broccoli Cheese Bake',
+    ['broccoli', 'cheese', 'milk', 'butter']);
+
+allRecipes = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
+
+
+// ************** INGREDIENTS ************** //
+
+const carrot = new Ingredient('carrot', 'vegetable', 'root vegetable');
+const lettuce = new Ingredient('lettuce', 'vegetable', 'leaf vegetable', ['iceberg lettuce', 'cos lettuce']);
+const spinach = new Ingredient('spinach', 'vegetable', 'leaf vegetable', ['baby spinach']);
+const broccoli = new Ingredient('broccoli', 'vegetable', 'flowering vegetable');
+
+const potato = new Ingredient('potato', 'vegetable', 'root vegetable', ['sweet potato']);
+const onion = new Ingredient('onion', 'vegetable', 'root vegetable', ['red onion', 'brown onion']);
+const garlic = new Ingredient('garlic', 'vegetable', 'root vegetable');
+const shallot = new Ingredient('shallot', 'vegetable', 'root vegetable');
+const leek = new Ingredient('leek', 'vegetable', 'root vegetable');
+const springOnion = new Ingredient('spring onion', 'vegetable', 'root vegetable', ['green onion', 'scallion']);
+
+const mushroom = new Ingredient('mushroom', 'fungus', '', ['button mushroom', 'portobello mushroom']);
+
+const milk = new Ingredient('milk', '', '', ['full cream milk', 'hilo milk', 'skim milk']);
+const butter = new Ingredient('butter', 'dairy', '');
+const cheese = new Ingredient('cheese', 'dairy', '')
+const yogurt = new Ingredient('yogurt', 'dairy', '', ['greek yogurt']);
+
+const apple = new Ingredient('apple', 'fruit', 'pome', ['red apple', 'green apple', 'granny smith', 'golden delicious']);
+
+const tomato = new Ingredient('tomato', 'vegetable', '', ['cherry tomato', 'roma tomato']);
+const cucumber = new Ingredient('cucumber', 'vegetable', '', ['english cucumber', 'persian cucumber']);
+
+const almond = new Ingredient('almond', 'nut', 'tree nut');
+const peanut = new Ingredient('peanut', 'nut', 'ground nut');
+
+const parsley = new Ingredient('parsley', 'herb', 'leafy herb');
+const basil = new Ingredient('basil', 'herb', 'leafy herb');
+const chives = new Ingredient('chives', 'herb', 'root herb', ['garlic chives']);
+
+const ginger = new Ingredient('ginger', 'vegetable', 'root spice', ['fresh ginger', 'ground ginger']);
+
+allIngredients = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, shallot, leek,
+    springOnion, mushroom, milk, butter, cheese, yogurt, apple, tomato, cucumber,
+    almond, peanut, parsley, basil, chives, ginger];
+
