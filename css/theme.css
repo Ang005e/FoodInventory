@@ -1,3 +1,6 @@
+:root {
+    --fit: fit-content;
+}
 * {
     box-sizing: border-box;
     margin: 0;
@@ -107,35 +110,103 @@ button:first-child {
 
 /******************** INVENTORY PAGE ********************/
 
-section.inventory {
-    position: relative;
-    left: 5vw;
-    width: 130px;
-    border-top: 1px solid black;
-}
-
 main.inventory {
     display: grid;
-    grid-template-rows: auto repeat(2, 10vw);
-    grid-template-columns: repeat(2, fit-content(100%));
+    padding-top: 5vh;
+    padding-left: 5vw;
+    grid-template-rows: auto auto auto;
+    grid-template-columns: repeat(2, calc((102% - 5vw) / 2));
     grid-auto-flow: row;
-}
-
-div.inventory {
-    position: relative;
-    width: 100%;
-    padding-top: 16px;
-    border-bottom: 1px solid black;
-}
-#ingredients div {
-    border-left: 1px solid black;
-    min-width: fit-content;
-}
-#dates div {
-    border-inline: 1px solid black;
+    overflow-y: auto;
 }
 p.inventory {
     text-align: left;
+    font-size: 1.8rem;
     padding-left: 3px;
-    width: fit-content;
+    width: 100%;
+}
+h1 {
+    font-size: 2.8rem;
+}
+
+/* Ingredients and dates */
+
+#scrollContainer {
+    grid-area: 1 / 1 / span 1 / span 2;
+    height: max-content;
+}
+#ingredientDisplay {
+    position: relative;
+    float: left;
+    width: calc(50%);
+    border-top: 1px solid black;
+}
+#dateDisplay {
+    position: relative;
+    width: calc(50%);
+    border-top: 1px solid black;
+}
+div.inventory {
+    position: relative;
+    width: clamp(var(--fit), 80%, 100%);
+    height: fit-content;
+    padding-top: 16px;
+    border-bottom: 1px solid black;
+}
+#ingredientDisplay div {
+    border-left: 1px solid black;
+    min-width: max-content;
+}
+#dateDisplay div {
+    border-inline: 1px solid black;
+}
+
+/* Recipes */
+#recipeDisplay {
+    grid-area: auto / span 1 / span 2;
+    height: fit-content;
+    margin-top: 8vh;
+}
+
+
+/******************** MEDIA QUERIES ********************/
+/************* design for mobile first! ;) *************/
+
+@media only screen and (min-width: 850px) {
+    main.inventory{
+        grid-template-rows: auto;
+        grid-template-columns: repeat(2, calc((50% - 2.5vw) / 2)) calc(50% - 2.5vw);
+        overflow-y: hidden;
+    }
+    p.inventory{
+        font-size: 1.3rem;
+    }
+    h1 {
+        font-size: 3rem;
+    }
+    #recipeDisplay {
+        grid-area: 1 / 3;
+        overflow-y: auto;
+        margin-top: 0;
+    }
+    #scrollContainer {
+        height: 100%;
+        overflow-y: auto;
+    }
+}
+
+@media only screen and (min-width: 1600px) {
+    main.inventory{
+        grid-template-rows: auto;
+        grid-template-columns: repeat(4, calc((50% - 2.5vw) / 4))  calc(50% - 2.5vw);
+    }
+    p.inventory{
+        font-size: 1.2rem;
+    }
+    h1 {
+        font-size: 3.2rem;
+    }
+    #recipeDisplay {
+        grid-area: 1 / 5;
+    }
 }

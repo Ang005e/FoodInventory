@@ -3,6 +3,7 @@
 if (pageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
+        loadRecipes(allRecipes);
     });
     document.querySelector('#btn-continue').addEventListener('click', function(){
         location.href = 'index.html';
@@ -11,22 +12,15 @@ if (pageName('inventory')) {
 
 function pageLoad() { // Main code. Runs on page load/reload. Populates elems with ingredients and use-by-dates.
     getIngredients(true).forEach((value) => {
-        let parentElem = document.querySelector('#ingredients');
-        createDiv(parentElem).innerText = value.toString();
+        let parentElem = document.querySelector('#ingredientDisplay');
+        let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
+        makeElement(elem, 'inventory', 'p').innerText = value.toString();
     })
     getIngredients(false, true).forEach((value) => {
-        let parentElem = document.querySelector('#dates');
-        createDiv(parentElem).innerText = value.toString();
+        let parentElem = document.querySelector('#dateDisplay');
+        let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
+        makeElement(elem, 'inventory', 'p').innerText = value.toString();
     })
-    function createDiv(parentElem) {
-        let elemContainer = document.createElement('div');
-        let elem = document.createElement('p');
-        elemContainer.classList.add('display-div', 'inventory')
-        elem.classList.add('inventory')
-        elemContainer.appendChild(elem);
-        parentElem.appendChild(elemContainer);
-        return elem;
-    }
 }
 
 function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
@@ -43,6 +37,22 @@ function getIngredients(ingredient, date) { // get all the user-entered ingredie
     if (ingredient) {return valuePairs[1]}
     else if (date) {return valuePairs[0]}
     return combinedValues;
+}
+
+function makeElement(parentElem, classes, elemType) {
+    let elem;
+    switch (elemType) {
+        case 'div':
+            elem = document.createElement('div');
+            break;
+        case 'p':
+            elem = document.createElement('p');
+            break;
+    }
+    classes instanceof Array ? classes.forEach((cls)=> elem.classList.add(cls)) : elem.classList.add(classes);
+    parentElem.appendChild(elem);
+
+    return elem;
 }
 
 /*

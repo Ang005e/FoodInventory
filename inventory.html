@@ -14,17 +14,22 @@
         </header>
         <main class="inventory">
 
-            <section id="ingredients" class="inventory">
+            <section id="scrollContainer">
+                <aside id="ingredientDisplay" class="inventory">
                 <div class="display-div inventory">
                     <p class="inventory">Ingredient</p>
                 </div>
-            </section>
-            <section id="dates" class="inventory">
-                <div class="display-div inventory">
-                    <p class="inventory">Use-By Date</p>
-                </div>
+                </aside>
+                <aside id="dateDisplay" class="inventory">
+                    <div class="display-div inventory">
+                        <p class="inventory">Use-By Date</p>
+                    </div>
+                </aside>
             </section>
 
+            <section id="recipeDisplay">
+                <p>Recipes:</p>
+            </section>
         </main>
         <footer>
             <button type="button" id="btn-continue" class="btn-ingredient">< Add More Ingredients <</button>

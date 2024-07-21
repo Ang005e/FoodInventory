@@ -1,5 +1,7 @@
 let allRecipes;
 
+// ************** Recipe class ************** //
+
 class Recipe {
     constructor(recipeName, ingredients, ingredientGroups, /* optionalIngredient, category, useDays, prepTime */) {
         this.recipeName = recipeName;
@@ -7,17 +9,16 @@ class Recipe {
         this.ingredientGroups = ingredientGroups;
         this.matches = [];
         // this.optionalIngredient = optionalIngredient;
-        // this.catergory = category;
+        // this.category = category;
         // this.useDays = useDays;
         // this.prepTime = prepTime;
     }
 
     matchMe(queriedIngredients = ['']) { // takes queries in string array format and calls matchIngredient() for each string
         try {
-
             queriedIngredients.forEach((queriedIngredient) => {
-                this.iterateIngredients(queriedIngredient, this.ingredients)
-                this.splitSubstitutes(queriedIngredient)
+                this.iterateIngredients(queriedIngredient, this.ingredients);
+                this.splitSubstitutes(queriedIngredient);
             })
             let matches = this.matches.length;
             let ingredientCount = this.ingredients.length + this.ingredientGroups.length;
@@ -43,58 +44,36 @@ class Recipe {
         this.ingredientGroups.forEach(group => { // split the 'ingredientGroups' array into each group
             let options = group.split('|') // separate the interchangeable ingredients.
             options.forEach(option => {
-                this.iterateIngredients(queriedIngredient, option)
+                this.iterateIngredients(queriedIngredient, option);
             })
         })
     }
 }
+
+// ************** Functions ************** //
+
+function loadRecipes(allRecipes) {
+    //ToDo: check recipe objects against a list of ingredients.
+
+    let allIngredients = getIngredients(true);
+
+    allRecipes.forEach((recipe) => {
+        if (recipe.matchMe(allIngredients)) {
+
+            let elem = makeElement(document.querySelector('#recipeDisplay'), ['display-div', 'inventory'], 'div')
+            makeElement(elem, 'inventory', 'p').innerText = recipe.recipeName;
+        }
+    })
+}
+
+
+// ************** RECIPES ************** //
 
 const nachos = new Recipe('Nachos',
     ['corn chips', 'red kidney beans'],
     ['tomato passata|tomato paste']);
 
 const potatoSoup = new Recipe('Potato Soup', ['potatoes', 'milk', 'butter'],
-    ['leek|chives|spring onion|parsley|basil'])
+    ['leek|chives|spring onion|parsley|basil']);
 
-allRecipes = [nachos, potatoSoup]
-
-recipes(allRecipes);
-
-function recipes(allRecipes) {
-    //ToDo: check recipe objects against a list of ingredients.
-
-    let allIngredients = getIngredients(true)
-
-    allRecipes.forEach((recipe) => {
-        recipe.matchMe(allIngredients)
-    })
-
-
-    // Additionally, there could be an algorithm to check if a recipe is ALMOST made, then a value to tell
-    // if an ingredient is vital to the recipe, or can be substituted.
-
-    // Categories for each recipe?
-}
-
-/*
-switch (//ingredient)  {
-    //ToDo: make a list of regularly used ingredients.
-    // could also add additional details to each matched ingredient
-    case 'corn chips':
-        type = 'tinned/dried';
-        usePriority = 'low';
-        break;
-    case 'red kidney beans':
-        type = 'tinned/dried';
-        usePriority = 'non perishable';
-        break;
-    case 'potato':
-        type = 'vegetable';
-        usePriority = 'medium';
-        break;
-    case 'milk':
-        type = 'dairy';
-        usePriority = 'high';
-        break;
-}
-*/
+allRecipes = [nachos, potatoSoup];
