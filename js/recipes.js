@@ -53,7 +53,6 @@ class Recipe {
 // ************** Functions ************** //
 
 function loadRecipes(allRecipes) {
-    //ToDo: check recipe objects against a list of ingredients.
 
     let allIngredients = getIngredients(true);
 
