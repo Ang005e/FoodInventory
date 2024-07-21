@@ -30,9 +30,14 @@ function getIngredients(ingredient, date) { // get all the user-entered ingredie
     let iterationCount = inputElemIdIndex('stored', false);
 
     for (let i = 1; i <= iterationCount; i++) {
-        let inputValue = storageAction('get', `txt-input${i}`).trim();
-        isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
-        combinedValues.push(inputValue); // populate a single array with ingredient/date values
+        try {
+            let inputValue = storageAction('get', `txt-input${i}`).trim();
+            isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
+            combinedValues.push(inputValue); // populate a single array with ingredient/date values
+        } catch {
+            !isEven(i) ? valuePairs[0].pop(): valuePairs[1].pop();
+            combinedValues.pop();
+        }
     }
     if (ingredient) {return valuePairs[1]}
     else if (date) {return valuePairs[0]}

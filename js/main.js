@@ -24,7 +24,7 @@ if (pageName('index')) {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
         if (inputElemIdIndex('current', false)>47){
-            alertUser('Note: HTML god has decided to not not let me put dateTime values into date inputs when testing with dummy data.')
+            alertUser('Note: HTML god has decided to not let me put dateTime values into date inputs when testing with dummy data.')
 
         }
     })
@@ -40,7 +40,7 @@ function focusListener(elem) {
 }
 
 try {
-    document.querySelector('#btn-test-population').addEventListener('click', (event) => {
+    document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
         let i = 0;
         let y = 0;
