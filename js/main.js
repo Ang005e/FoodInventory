@@ -191,6 +191,7 @@ function storeInputValue(event, elem, bulk = false) { // takes an event and an e
     try {
         console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
         if (elem.value === '') {
+            // noinspection ExceptionCaughtLocallyJS
             throw TypeError('Provided value is not of the correct format')
         }
         if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
