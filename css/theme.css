@@ -12,6 +12,8 @@
 main {
     scrollbar-gutter: stable;
     overflow-y: auto;
+    height: 80vh;
+    background-color: antiquewhite;
 }
 
 header {
@@ -21,10 +23,6 @@ header {
 footer {
     height: 10vh;
     background-color: bisque;
-}
-main {
-    height: 80vh;
-    background-color: antiquewhite;
 }
 
 h1 {
@@ -48,17 +46,17 @@ p, label {
 }
 
 form {
-    display: grid;
-    grid-template-rows: auto repeat(2, 1fr);
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(4, 1fr);
+    grid-template-columns: repeat(1, 1fr);
     overflow-x: auto;
+    grid-auto-flow: column;
 }
 fieldset {
-    min-width: 533px;
-    width: 48.5vw;
+    width: fit-content(100%);
     margin-left: 1vw;
     height: 37vh;
 }
+
 #buttons-div {
     height: 10vh;
     width: 100vw;
@@ -102,6 +100,19 @@ button:first-child {
     height: 5vh;
     min-height: fit-content;
     transform: translate(calc(-50% + 50vw));
+}
+#field-buttons {
+    display: grid;
+    grid-template-rows: 1fr;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100vw;
+    padding-right: 0.5vw;
+}
+.btn-ingredient {
+    margin-inline: 5px;
+}
+#btn-remove-all {
+    margin-left: 1vw;
 }
 
 .hidden {
@@ -193,6 +204,23 @@ div.inventory {
         height: 100%;
         overflow-y: auto;
     }
+}
+
+@media only screen and (min-width: 1200px) {
+    form {
+        display: grid;
+        grid-template-rows: repeat(2, 1fr);
+        grid-template-columns: repeat(2, 1fr);
+        overflow-x: auto;
+        grid-auto-flow: row;
+    }
+
+    fieldset {
+        width: 48.5vw;
+        margin-left: 1vw;
+        height: 37vh;
+    }
+
 }
 
 @media only screen and (min-width: 1600px) {
