@@ -24,7 +24,7 @@ if (pageName('index')) {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
         if (inputElemIdIndex('current', false)>47){
-            alertUser('Note: HTML god has decided to not let me put dateTime values into date inputs when testing with dummy data.')
+            alertUser('Note: HTML god prevents population of date inputs with dateTime values when testing with dummy data.')
 
         }
     })
