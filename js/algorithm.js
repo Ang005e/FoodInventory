@@ -25,13 +25,16 @@ function pageLoad() { // Main code. Runs on page load/reload. Populates elems wi
 
 function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
     // either combined or individual formats.
-    let valuePairs = [[], []]; // I get off on confusing people who try to understand my code
+    let valuePairs = ([
+        [],
+        []
+    ]); // I didn't know map() existed
     let combinedValues = []
     let iterationCount = inputElemIdIndex('stored', false);
 
     for (let i = 1; i <= iterationCount; i++) {
         try {
-            let inputValue = storageAction('get', `txt-input${i}`).trim();
+            let inputValue = storageAction('get', `txt-input${i}`).trim().toLowerCase(); // clean the string
             isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
             combinedValues.push(inputValue); // populate a single array with ingredient/date values
         } catch {
@@ -61,7 +64,7 @@ function makeElement(parentElem, classes, elemType) {
 }
 
 /*
-still quite chuffed with this sly use of arrays, even though it's useless now.
+chuffed with this sly use of arrays it's useless now tho.
 function getIngredients() {
     let ingredients = [];
     let numIterations = [handleBulkInput(), inputElemIdIndex('stored', false)]; // this

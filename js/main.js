@@ -25,21 +25,8 @@ if (pageName('index')) {
         document.querySelector('.btn-ingredient').focus()
         if (inputElemIdIndex('current', false)>47){
             alertUser('Note: HTML god prevents population of date inputs with dateTime values when testing with dummy data.')
-
         }
     })
-}
-
-// Adds listeners to allow users to manipulate selected input elements
-function focusListener(elem) {
-    if (elem instanceof Element) {
-        elem.addEventListener('focus', (event) => eventCentre(event));
-        return;
-    }
-    document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
-}
-
-try {
     document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
         let i = 0;
@@ -54,7 +41,17 @@ try {
         repopulatePage();
         location.reload()
     })
-}catch{}
+}
+
+
+// Adds listeners to allow users to manipulate selected input elements
+function focusListener(elem) {
+    if (elem instanceof Element) {
+        elem.addEventListener('focus', (event) => eventCentre(event));
+        return;
+    }
+    document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
+}
 
 
 // ************ MAIN FUNCTION ************

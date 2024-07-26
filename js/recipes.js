@@ -4,7 +4,7 @@ let allIngredients;
 // ************** CLASSES ************** //
 
 class Recipe {
-    constructor(recipeName, ingredients, ingredientGroups, /* optionalIngredient, category, useDays, prepTime */) {
+    constructor(recipeName, ingredients, ingredientGroups = [], /* optionalIngredient, category, useDays, prepTime */) {
         this.recipeName = recipeName;
         this.ingredients = ingredients;
         this.ingredientGroups = ingredientGroups;
@@ -18,8 +18,8 @@ class Recipe {
     matchMe(queriedIngredients = ['']) { // takes queries in string array format and calls matchIngredient() for each string
         try {
             queriedIngredients.forEach((queriedIngredient) => {
-                this.iterateIngredients(queriedIngredient, this.ingredients);
-                this.splitSubstitutes(queriedIngredient);
+                this.iterateIngredients(queriedIngredient, this.ingredients); // perform matching on the main query
+                this.splitSubstitutes(queriedIngredient); // split alternate names/spellings of the main query, and do the same
             })
             let matches = this.matches.length;
             let ingredientCount = this.ingredients.length + this.ingredientGroups.length;
@@ -34,6 +34,8 @@ class Recipe {
         }
         catch(e) {errorPrinter(e); return false;}
     }
+
+    // **************** MATCHING ALGORITHM **************** //
     iterateIngredients(queriedIngredient, list) {
         if (list instanceof Array) {
             list.forEach((ingredient) => {
@@ -41,6 +43,7 @@ class Recipe {
             })
         }else if(RegExp(list, 'i').test(queriedIngredient)) {this.matches.push(queriedIngredient)}
     }
+
     splitSubstitutes(queriedIngredient) {
         this.ingredientGroups.forEach(group => { // split the 'ingredientGroups' array into each group
             let options = group.split('|') // separate the interchangeable ingredients.
@@ -52,11 +55,14 @@ class Recipe {
 }
 
 class Ingredient {
-    constructor(ingName, ingType, subType, alternateNames = []) {
+    constructor(ingName, ingType, subType, alternateNames) {
         this.ingName = ingName;
         this.ingType = ingType;
         this.subType = subType;
         this.alternateNames = alternateNames;
+    }
+    commaToArray() {
+
     }
 }
 
@@ -105,6 +111,14 @@ allRecipes = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseSt
 
 
 // ************** INGREDIENTS ************** //
+
+// curry pastes, parmesan
+
+const tofu = new Ingredient('tofu', 'protein', '');
+const parmesan = new Ingredient('parmesan', 'dairy', 'cheese', ['parmigiano reggiano', 'reggiano'])
+const coconutMilk = new Ingredient('coconut milk', 'misc', '');
+const silverbeet = new Ingredient('silverbeet', 'vegetable', 'leaf vegetable', ['chard']);
+const curryPaste = new Ingredient('curry paste', 'misc', '');
 
 const carrot = new Ingredient('carrot', 'vegetable', 'root vegetable');
 const lettuce = new Ingredient('lettuce', 'vegetable', 'leaf vegetable', ['iceberg lettuce', 'cos lettuce']);
