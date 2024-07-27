@@ -8,6 +8,7 @@ let _timeoutPromise;
 let _dummyDataTest = false;
 //get fked globals
 
+
 // ************ CALLBACK FUNCTIONS (LISTENERS) ************
 
 // Add input fields on the click of a button:
@@ -44,7 +45,6 @@ if (pageName('index')) {
         location.reload()
     })
 }
-
 
 // Adds listeners to allow users to manipulate selected input elements
 function focusListener(elem) {
@@ -229,7 +229,7 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
 }
 
 function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
-    let prevElems = !_dummyDataTest ? inputCount('stored', false) : inputCount('stored', true);
+    let prevElems = inputCount('stored', false);
     for (let j = 1; j <= prevElems; j++) {
 
         let elemKeyId = `txt-input${j}`
