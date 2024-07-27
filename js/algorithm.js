@@ -64,7 +64,6 @@ function makeElement(parentElem, classes, elemType) {
     return elem;
 }
 
-
 /*
 chuffed with this sly use of arrays it's useless now tho.
 function getIngredients() {
