@@ -1,4 +1,4 @@
-let allRecipes;
+let recipeClasses;
 let allIngredients;
 
 // ************** CLASSES ************** //
@@ -69,9 +69,9 @@ class Ingredient {
 
 // ************** Functions ************** //
 
-function loadRecipes(allRecipes) {
+function loadRecipes() {
 
-    allRecipes.forEach((recipe) => {
+    RecipeClasses.forEach((recipe) => {
         if (recipe.matchMe(getIngredients(true))) {
 
             let elem = makeElement(document.querySelector('#recipeDisplay'), ['display-div', 'inventory'], 'div')
@@ -105,7 +105,7 @@ const mushroomCheeseStuffedPotatoes = new Recipe('Mushroom Cheese Stuffed Potato
 const broccoliCheeseBake = new Recipe('Broccoli Cheese Bake',
     ['broccoli', 'cheese', 'milk', 'butter']);
 
-allRecipes = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
+RecipeClasses = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
 
 
 // ************** INGREDIENTS ************** //
