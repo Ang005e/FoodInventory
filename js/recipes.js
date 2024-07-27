@@ -1,5 +1,5 @@
-let allRecipes;
-let allIngredients;
+let RecipeClasses;
+let IngredientClasses;
 
 // ************** CLASSES ************** //
 
@@ -69,13 +69,10 @@ class Ingredient {
 
 // ************** Functions ************** //
 
-function loadRecipes(allRecipes) {
+function loadRecipes() {
 
-    let allIngredients = getIngredients(true);
-
-    allRecipes.forEach((recipe) => {
-        if (recipe.matchMe(allIngredients)) {
-
+    RecipeClasses.forEach((recipe) => {
+        if (recipe.matchMe(getIngredients(true))) {
             let elem = makeElement(document.querySelector('#recipeDisplay'), ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = recipe.recipeName;
         }
@@ -107,7 +104,7 @@ const mushroomCheeseStuffedPotatoes = new Recipe('Mushroom Cheese Stuffed Potato
 const broccoliCheeseBake = new Recipe('Broccoli Cheese Bake',
     ['broccoli', 'cheese', 'milk', 'butter']);
 
-allRecipes = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
+RecipeClasses = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
 
 
 // ************** INGREDIENTS ************** //
@@ -153,7 +150,7 @@ const chives = new Ingredient('chives', 'herb', 'root herb', ['garlic chives']);
 
 const ginger = new Ingredient('ginger', 'vegetable', 'root spice', ['fresh ginger', 'ground ginger']);
 
-allIngredients = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, shallot, leek,
+IngredientClasses = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, shallot, leek,
     springOnion, mushroom, milk, butter, cheese, yogurt, apple, tomato, cucumber,
     almond, peanut, parsley, basil, chives, ginger];
 

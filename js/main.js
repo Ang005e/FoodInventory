@@ -8,7 +8,6 @@ let _timeoutPromise;
 let _dummyDataTest = false;
 //get fked globals
 
-
 // ************ CALLBACK FUNCTIONS (LISTENERS) ************
 
 // Add input fields on the click of a button:
@@ -23,7 +22,7 @@ if (pageName('index')) {
     document.addEventListener('DOMContentLoaded', (event) => {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
-        if (inputElemIdIndex('current', false)>47){
+        if (inputCount('current', false)>47){
             alertUser('Note: HTML god prevents population of date inputs with dateTime values when testing with dummy data.')
         }
     })
@@ -32,12 +31,13 @@ if (pageName('index')) {
         let i = 0;
         let y = 0;
         storageAction('clear-all', '');
-        allIngredients.forEach((ingredient)=> {
+        IngredientClasses.forEach((ingredient)=> {
             let x = Math.round(Math.random() * 10);
             (y > 29) && (y=0);
             storageAction('store', `txt-input${++i}`, ingredient.ingName)
             storageAction('store', `txt-input${++i}`, `${++y}-${x}-${x}${x}${x}${x}`)
         })
+        removeAllInputs();
         repopulatePage();
         location.reload()
     })
@@ -73,7 +73,7 @@ function eventCentre(event) {
                 // must be the enter key used on an ingredient/date field or btn-add-input, so:
 
                 if (event.target.id === 'btn-add-input') {
-                    return createInput(inputElemIdIndex() + 1);
+                    return createInput(inputCount() + 1);
                 }
                 if (event.target.className === 'txt-bulk') {
                     storeInputValue(event, event.target, true);
@@ -87,7 +87,7 @@ function eventCentre(event) {
                 return;
         }
 
-        let elem = document.querySelector(`#txt-input${inputElemIdIndex('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
+        let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
         let issue;
         let skipCreation = false;
 
@@ -95,7 +95,7 @@ function eventCentre(event) {
             case 'btn-add-input':
 
                 if (nullElem(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
-                    createInput(inputElemIdIndex() + 1);
+                    createInput(inputCount() + 1);
                     return;
                 }
                 issue = storeInputValue(event, elem);
@@ -112,7 +112,7 @@ function eventCentre(event) {
                 return;
             case 'btn-remove-all':
                 storageAction('clear_all', undefined);
-                inputElemIdIndex('none', true);
+                inputCount('none', true);
                 removeAllInputs();
                 return;
             case 'btn-continue':
@@ -122,7 +122,7 @@ function eventCentre(event) {
                 return;
         }
         // once the above has been completed, create the new element
-        (skipCreation === false) && (createInput(inputElemIdIndex() + 1))
+        (skipCreation === false) && (createInput(inputCount() + 1))
     } catch (e) {
         errorPrinter(e)
     }
@@ -138,8 +138,8 @@ function removeAllInputs() {
 }
 
 function createInput(idIndex) { // Create and configure empty input element
-    if (inputElemIdIndex() !== 46) {
-        if (isEven(inputElemIdIndex())) {
+    if (inputCount() !== 46) {
+        if (isEven(inputCount())) {
             setFieldsetInput('input', 1, '', ['type', 'class', 'id', 'placeholder'], ['text', 'ingredient-input single-input', `txt-input${idIndex}`, '[Ingredient]'] );
         }else {
             setFieldsetInput('input', 2, '', ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${idIndex}`] );
@@ -199,7 +199,7 @@ function storeInputValue(event, elem, bulk = false) { // takes an event and an e
         } else if (bulk) {
             if (event.target.value !== undefined) {
                 event.target.value.split(',').forEach(text => {
-                    storageAction('store', `txt-input${inputElemIdIndex('stored', true) + 1}`, text);
+                    storageAction('store', `txt-input${inputCount('stored', true) + 1}`, text);
                 });
                 setElemAttribute(elem);
             }
@@ -207,7 +207,7 @@ function storeInputValue(event, elem, bulk = false) { // takes an event and an e
             storageAction('store', elem.id, elem.value);
             setElemAttribute(elem);
         }
-        inputElemIdIndex('none', true);
+        inputCount('none', true);
     }catch (e) {
         errorPrinter(e);
         if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
@@ -227,7 +227,7 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
 }
 
 function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
-    let prevElems = inputElemIdIndex('stored', false);
+    let prevElems = !_dummyDataTest ? inputCount('stored', false) : inputCount('stored', true);
     for (let j = 1; j <= prevElems; j++) {
 
         let elemKeyId = `txt-input${j}`
@@ -252,11 +252,11 @@ function repopulatePage() { // repopulates the elements on the page when the use
         }
     }
 
-    inputElemIdIndex('none', true);
+    inputCount('none', true);
 
 }
 
-function inputElemIdIndex(returnIndex = 'current', refreshStoredIndex = true) {
+function inputCount(returnIndex = 'current', refreshStoredIndex = true) {
     if (refreshStoredIndex) {
 
         let i = -1;
@@ -300,15 +300,15 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
     pair.forEach(elemIdNum => {
         try {
             storageAction('clear', `txt-input${elemIdNum}`);
-            document.querySelector(`#txt-input${elemIdNum}`).remove()
+            document.querySelector(`#txt-input${elemIdNum}`).remove();
         }catch (e) {errorPrinter(e)}
 
     })
 
-    shuffleInputs();
+    shuffleIdIndex();
 }
 
-function shuffleInputs() { // fixes gaps in the indexing of each input element by detecting if the previous element increments by more than 1.
+function shuffleIdIndex() { // fixes gaps in the id indexing of each input element by detecting if the previous element increments by more than 1.
     let prevElemIdNum = 0;
     let idOffset = 0;
     let inputElems = [];
@@ -320,7 +320,7 @@ function shuffleInputs() { // fixes gaps in the indexing of each input element b
     inputElems.forEach((elem) =>{
         let existingElemIdNum = getInputIdNum(elem);
 
-        // commence complicated maths that I blundered my way through
+        // commence confusing maths that I blundered my way through
         if (existingElemIdNum > prevElemIdNum - idOffset + 1) {
             idOffset = existingElemIdNum - prevElemIdNum; // the gap between the IDs
             reshuffledId = (existingElemIdNum - idOffset) + 1
@@ -367,6 +367,8 @@ function isEven(value) {
 function pageName(page) {
     return document.location.pathname.includes(`${page}.html`);
 }
+
+// ********************** ultimate reusability accomplished ********************** //
 function errorPrinter(e) { // this has to be ultimate lazy programming (aka modularity)
     let startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
     // (must be the function that the error happened in)

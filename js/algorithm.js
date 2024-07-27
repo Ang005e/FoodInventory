@@ -3,7 +3,7 @@
 if (pageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
-        loadRecipes(allRecipes);
+        loadRecipes();
     });
     document.querySelector('#btn-continue').addEventListener('click', function(){
         location.href = 'index.html';
@@ -24,27 +24,28 @@ function pageLoad() { // Main code. Runs on page load/reload. Populates elems wi
 }
 
 function getIngredients(ingredient, date) { // get all the user-entered ingredients, format them, and return them in
-    // either combined or individual formats.
-    let valuePairs = ([
-        [],
-        []
-    ]); // I didn't know map() existed
-    let combinedValues = []
-    let iterationCount = inputElemIdIndex('stored', false);
+    // either combined or individual formats, using big daddy Map().
+    let cleanPairs = new Map();
+    let combinedPairs = []
+    let iterationCount = inputCount('stored', false);
 
-    for (let i = 1; i <= iterationCount; i++) {
+    for (let i = 1; i < iterationCount; i+=2) {
         try {
-            let inputValue = storageAction('get', `txt-input${i}`).trim().toLowerCase(); // clean the string
-            isEven(i) ? valuePairs[0].push(inputValue) : valuePairs[1].push(inputValue); // populate two arrays with ingredient/date values
-            combinedValues.push(inputValue); // populate a single array with ingredient/date values
-        } catch {
-            !isEven(i) ? valuePairs[0].pop(): valuePairs[1].pop();
-            combinedValues.pop();
+            let inputPair = [storageAction('get', `txt-input${i}`), storageAction('get', `txt-input${i+1}`)];
+            inputPair = inputPair.map((val) => val.trim().toLowerCase()); // clean the strings
+            cleanPairs.set(inputPair[0], inputPair[1]); // What a massive pair of Map()s ([*] [*])
+            combinedPairs.push(inputPair); // populate a single array with ingredient/date values
+
+        } catch (e){ // if something goes wrong, we must be at the end...
+            if (e.message.match(/Cannot read properties of null \(reading 'trim'\)/ig) !== null){
+                alertUser(`"${storageAction('get', `txt-input${i}`)}" was entered without a date, and will not be displayed or matched`);
+                errorPrinter(e);
+            }
         }
     }
-    if (ingredient) {return valuePairs[1]}
-    else if (date) {return valuePairs[0]}
-    return combinedValues;
+    if (ingredient) {return cleanPairs.keys()}
+    else if (date) {return cleanPairs.values()}
+    return combinedPairs;
 }
 
 function makeElement(parentElem, classes, elemType) {
@@ -63,13 +64,14 @@ function makeElement(parentElem, classes, elemType) {
     return elem;
 }
 
+
 /*
 chuffed with this sly use of arrays it's useless now tho.
 function getIngredients() {
     let ingredients = [];
-    let numIterations = [handleBulkInput(), inputElemIdIndex('stored', false)]; // this
+    let numIterations = [handleBulkInput(), inputCount('stored', false)]; // this
     // is an array with items that refer to the number of storage items in each separate storage-key-naming-scheme (i.e.
-    // bulkInput(index) or txtInput(index). The array stores the (index) part). It's used to gracefully manipulate localStorage
+    // bulkInput(index) or txtInput(index). The array stores the (index) part). It's used to gracefully manipulate localStorage.
 
     numIterations.forEach(iteration => { // for each 'index array':
         let keyTemplate = (iteration === numIterations[0] ? 'bulk-input' : 'txt-input')
