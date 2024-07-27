@@ -15,16 +15,12 @@ document.querySelectorAll('.btn-ingredient').forEach((elem)=> {
     elem.addEventListener('click', (event) => eventCentre(event))
 })
 
-document.addEventListener('keypress', (event) => eventCentre(event));
-
 // Populate index.html's elements with stored (previously entered) values
 if (pageName('index')) {
     document.addEventListener('DOMContentLoaded', (event) => {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
-        if (inputCount('current', false)>47){
-            alertUser('Note: HTML god prevents population of date inputs with dateTime values when testing with dummy data.')
-        }
+        document.addEventListener('keypress', (event) => eventCentre(event));
     })
     document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
@@ -40,7 +36,7 @@ if (pageName('index')) {
             storageAction('store', `txt-input${++i}`, `${(Math.round(i/2))+2000}-${m}-${d}`)
         })
         removeAllInputs();
-        repopulatePage();
+        populatePage();
         location.reload()
     })
 }
@@ -63,7 +59,7 @@ function eventCentre(event) {
         console.log(event.type);
         switch (event.type) {
             case 'DOMContentLoaded':
-                repopulatePage();
+                populatePage();
                 return;
 
             case 'keypress':
@@ -72,16 +68,18 @@ function eventCentre(event) {
                     return
                 }
                 // must be the enter key used on an ingredient/date field or btn-add-input, so:
+                event.preventDefault();
 
+                debugger
                 if (event.target.id === 'btn-add-input') {
+                    storeInputValue(event, event.target);
                     return createInput(inputCount() + 1);
                 }
                 if (event.target.className === 'txt-bulk') {
                     storeInputValue(event, event.target, true);
                     document.querySelector('#txt-bulk-date').focus()
                 }
-                let issue = storeInputValue(event, event.target);
-                if (issue) {return}
+
                 break;
             case 'focus':
                 _focusedElem = event.target.id;
@@ -185,30 +183,36 @@ function alertUser(message) {
 
 function storeInputValue(event, elem, bulk = false) { // takes an event and an elem as arguments,
     // and prepares values for use with storageAction. Also refreshed the id index system.
-    event.preventDefault();
     try {
-        console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
-        if (elem.value === '') {
-            // noinspection ExceptionCaughtLocallyJS
-            throw TypeError('Provided value is not of the correct format')
+        // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
+        // Guard clauses:
+        if (inputCount('current') === 0) {return}
+        if (event.target.id === 'btn-add-input') {elem = document.querySelector(`txt-input${inputCount('current')}`)}
+        if (inputEmpty(event.target.value) && inputEmpty(elem.value)) {
+            inputError();
         }
+
         if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
             elem.forEach(elem => {
                 storageAction('store', elem.id, elem.value);
                 setElemAttribute(elem);
             })
         } else if (bulk) {
-            if (event.target.value !== undefined) {
-                event.target.value.split(',').forEach(text => {
-                    storageAction('store', `txt-input${inputCount('stored', true) + 1}`, text);
-                });
-                setElemAttribute(elem);
-            }
+            event.target.value.split(',').forEach(text => {
+                storageAction('store', `txt-input${inputCount('stored', true) + 1}`, text);
+            });
+            setElemAttribute(elem);
         } else { // passed in as a single elem? do:
             storageAction('store', elem.id, elem.value);
             setElemAttribute(elem);
         }
         inputCount('none', true);
+
+        function inputError() {
+            debugger
+            // noinspection ExceptionCaughtLocallyJS
+            throw TypeError('Provided value is not of the correct format')
+        }
     }catch (e) {
         errorPrinter(e);
         if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
@@ -227,32 +231,39 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
     }
 }
 
-function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
+function populatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
+
+    // collect the elements in local storage, plus those already on the page.
     let prevElems = !_dummyDataTest ? inputCount('stored', false) : inputCount('stored', true);
-    for (let j = 1; j <= prevElems; j++) {
+    let currentElems = inputCount('current', true);
 
-        let elemKeyId = `txt-input${j}`
-        let storedValue = storageAction('get', elemKeyId) // get the value of the existing element from local storage
+    // for every elem not already on the page, add an elem to the page and assign the stored value.
+    for (let i = currentElems+1; i <= prevElems; i++) {
+        let elemKeyId = `txt-input${i}`
+        let storedValue = storageAction('get', elemKeyId) // (the value of the existing element in local storage)
 
-        if ((storedValue !== null) && (storedValue !== '')) { // if the elem is NOT empty
-            if (!isEven(j)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even
+        alternateFields(storedValue, i);
+        verifyIndexing(storedValue, prevElems, i);
+
+        function alternateFields(storedValue, i) {
+            if (!isEven(i)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even
                 // set the chosen elem to its old value
-                setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${j}`] );
-            }else {
-                setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${j}`] );
+                setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${i}`]);
+            } else {
+                setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${i}`]);
             }
-
+        }
+        function verifyIndexing(storedValue, prevElems, i) {
             // overwrite local storage in case this value has been reshuffled
-            setElemAttribute(document.querySelector(`#txt-input${j}`));
+            setElemAttribute(document.querySelector(`#txt-input${i}`));
             storageAction('clear', elemKeyId)
-            storageAction('store', `txt-input${j}`, storedValue)
+            storageAction('store', `txt-input${i}`, storedValue)
 
-            if ((j === prevElems)&&(!_dummyDataTest)) {
-                !isEven(prevElems) ? storageAction('clear', `txt-input${j-1}`) : 0;
-             } // if there's an ingredient elem at the end that's not paired with a date, delete it.
+            if ((i === prevElems)&&(!_dummyDataTest)) {
+                !isEven(prevElems) ? storageAction('clear', `txt-input${i-1}`) : 0;
+            } // if there's an ingredient elem at the end that's not paired with a date, delete it.
         }
     }
-
     inputCount('none', true);
 
 }
@@ -358,6 +369,19 @@ function nullElem(elem) {// Check if an element is null
         return true;
     }
     return false;
+}
+function inputEmpty(value) {
+    try {value.trim();} catch {return false;}
+    switch (value) {
+        case undefined:
+        case 'undefined':
+        case null:
+        case 'null':
+        case '':
+            return true;
+        default:
+            return false;
+    }
 }
 
 function isEven(value) {
