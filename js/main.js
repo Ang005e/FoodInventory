@@ -8,6 +8,7 @@ let _timeoutPromise;
 let _dummyDataTest = false;
 //get fked globals
 
+
 // ************ CALLBACK FUNCTIONS (LISTENERS) ************
 
 // Add input fields on the click of a button:
@@ -15,12 +16,16 @@ document.querySelectorAll('.btn-ingredient').forEach((elem)=> {
     elem.addEventListener('click', (event) => eventCentre(event))
 })
 
+document.addEventListener('keypress', (event) => eventCentre(event));
+
 // Populate index.html's elements with stored (previously entered) values
 if (pageName('index')) {
     document.addEventListener('DOMContentLoaded', (event) => {
         eventCentre(event)
         document.querySelector('.btn-ingredient').focus()
-        document.addEventListener('keypress', (event) => eventCentre(event));
+        if (inputCount('current', false)>47){
+            alertUser('Note: HTML god prevents population of date inputs with dateTime values when testing with dummy data.')
+        }
     })
     document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
@@ -28,15 +33,15 @@ if (pageName('index')) {
         let d = 0;
         let m = 0;
         storageAction('clear-all', '');
-        IngredientClasses.forEach((ingredient)=> {
+        allIngredients.forEach((ingredient)=> {
+            let x = Math.round(Math.random() * 10);
             d++;m++;
             (d > 29) && (d=1); (m > 12) && (m = 1);
             (d < 10) && (d = `0${d}`); (m < 10) && (m = `0${m}`);
             storageAction('store', `txt-input${++i}`, ingredient.ingName)
             storageAction('store', `txt-input${++i}`, `${(Math.round(i/2))+2000}-${m}-${d}`)
         })
-        removeAllInputs();
-        populatePage();
+        repopulatePage();
         location.reload()
     })
 }
@@ -56,54 +61,36 @@ function focusListener(elem) {
 function eventCentre(event) {
     // Centralises and manages events, and makes it MUCH easier to debug and understand.
     try {
-        let issue;
         console.log(event.type);
         switch (event.type) {
             case 'DOMContentLoaded':
-                populatePage();
+                repopulatePage();
                 return;
+
             case 'keypress':
-                if ((event.key !== 'Enter') && (event.key !== undefined)) {return}
 
-                // Bulk input hotkey:
-                if (event.key === 'Enter' && event.shiftKey) { // shift + enter
-                    event.preventDefault();
-
-                    let date = (event.target === document.querySelector('#txt-bulk-date'));
-
-                    if (event.target.id === 'txt-bulk-ingredient') {
-                        storeBulkInput('store', event.target.value, date);
-                        document.querySelector('#txt-bulk-date').focus();
-                        return;
-                    } else if (event.target.id === 'txt-bulk-date') {
-                        storeBulkInput('store', event.target.value, date);
-                        storeBulkInput('combine', event.target.value, date);
-                        document.querySelector('#txt-bulk-ingredient').focus();
-                        return;
-                    }
-                    document.querySelector('#txt-bulk-ingredient').focus();
+                if ((event.key !== 'Enter') && (event.key !== undefined)) {
                     return
-                    }
-
+                }
                 // must be the enter key used on an ingredient/date field or btn-add-input, so:
-                if (event.target.className === 'txt-bulk') {return}
-                event.preventDefault();
 
                 if (event.target.id === 'btn-add-input') {
-                    storeInputValue(event, `txt-input${inputCount('current')}`);
                     return createInput(inputCount() + 1);
                 }
-
-                issue = storeInputValue(event, event.target);
+                if (event.target.className === 'txt-bulk') {
+                    storeInputValue(event, event.target, true);
+                    document.querySelector('#txt-bulk-date').focus()
+                }
+                let issue = storeInputValue(event, event.target);
                 if (issue) {return}
                 break;
-
             case 'focus':
                 _focusedElem = event.target.id;
                 return;
         }
 
         let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
+        let issue;
         let skipCreation = false;
 
         switch (event.target.id) {
@@ -119,8 +106,11 @@ function eventCentre(event) {
                 }
                 break;
             case 'btn-remove-input':
-                try {removeInputPair(_focusedElem);}
-                catch {removeInputPair(elem)}
+                try {
+                    removeInputPair(_focusedElem);
+                } catch {
+                    removeInputPair(elem);
+                }
                 return;
             case 'btn-remove-all':
                 storageAction('clear_all', undefined);
@@ -141,7 +131,7 @@ function eventCentre(event) {
 }
 
 
-// ************ GUI/HTML & CSS Manipulation Functions ************ //
+// ************ HELPER FUNCTIONS ************
 
 function removeAllInputs() {
     document.querySelectorAll('.single-input').forEach((elem) => {
@@ -150,10 +140,12 @@ function removeAllInputs() {
 }
 
 function createInput(idIndex) { // Create and configure empty input element
-    if (isEven(inputCount())) {
-        setFieldsetInput('input', 1, '', ['type', 'class', 'id', 'placeholder'], ['text', 'ingredient-input single-input', `txt-input${idIndex}`, '[Ingredient]'] );
-    }else {
-        setFieldsetInput('input', 2, '', ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${idIndex}`] );
+    if (inputCount() !== 46) {
+        if (isEven(inputCount())) {
+            setFieldsetInput('input', 1, '', ['type', 'class', 'id', 'placeholder'], ['text', 'ingredient-input single-input', `txt-input${idIndex}`, '[Ingredient]'] );
+        }else {
+            setFieldsetInput('input', 2, '', ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${idIndex}`] );
+        }
     }
 }
 
@@ -192,6 +184,39 @@ function alertUser(message) {
     _timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
 }
 
+function storeInputValue(event, elem, bulk = false) { // takes an event and an elem as arguments,
+    // and prepares values for use with storageAction. Also refreshed the id index system.
+    event.preventDefault();
+    try {
+        console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
+        if (elem.value === '') {
+            // noinspection ExceptionCaughtLocallyJS
+            throw TypeError('Provided value is not of the correct format')
+        }
+        if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
+            elem.forEach(elem => {
+                storageAction('store', elem.id, elem.value);
+                setElemAttribute(elem);
+            })
+        } else if (bulk) {
+            if (event.target.value !== undefined) {
+                event.target.value.split(',').forEach(text => {
+                    storageAction('store', `txt-input${inputCount('stored', true) + 1}`, text);
+                });
+                setElemAttribute(elem);
+            }
+        } else { // passed in as a single elem? do:
+            storageAction('store', elem.id, elem.value);
+            setElemAttribute(elem);
+        }
+        inputCount('none', true);
+    }catch (e) {
+        errorPrinter(e);
+        if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
+        return true;
+    }
+}
+
 function setElemAttribute(elem, attribute='readonly', value='readonly') {
     try {
         if (!elem.hasAttribute(attribute)) {
@@ -203,160 +228,34 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
     }
 }
 
+function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
+    let prevElems = inputCount('stored', false);
+    for (let j = 1; j <= prevElems; j++) {
 
-// ************************ Modular Page Population ************************ //
-// populates the screen with paired elems and their
-// corresponding data/text/date values.
+        let elemKeyId = `txt-input${j}`
+        let storedValue = storageAction('get', elemKeyId) // get the value of the existing element from local storage
 
-function populatePage() { // repopulates the elements on the page when the user reloads (locally stored values must be avalable)
+        if ((storedValue !== null) && (storedValue !== '')) { // if the elem is NOT empty
+            if (!isEven(j)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even
+                // set the chosen elem to its old value
+                setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${j}`] );
+            }else {
+                setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${j}`] );
+            }
 
-    // collect the elements in local storage, plus those already on the page.
-    let prevElems = inputCount('stored', true)
-    let currentElems = inputCount('current', true);
+            // overwrite local storage in case this value has been reshuffled
+            setElemAttribute(document.querySelector(`#txt-input${j}`));
+            storageAction('clear', elemKeyId)
+            storageAction('store', `txt-input${j}`, storedValue)
 
-    // for every ID value (in storage) not already on the page, add an elem to the page and assign the corresponding value.
-    for (let i = currentElems+1; i <= prevElems; i++) {
-        let elemKeyId = `txt-input${i}`
-        let storedValue = storageAction('get', elemKeyId) // (the value of the existing element in local storage)
-
-        alternateFields(storedValue, i);
-        verifyIndexing(storedValue, prevElems, elemKeyId, i);
+            if ((j === prevElems)&&(!_dummyDataTest)) {
+                !isEven(prevElems) ? storageAction('clear', `txt-input${j-1}`) : 0;
+             } // if there's an ingredient elem at the end that's not paired with a date, delete it.
         }
+    }
+
     inputCount('none', true);
-}
 
-function alternateFields(storedValue, i) {
-    if (!isEven(i)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even
-        // set the chosen elem to its old value
-        setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${i}`]);
-    } else {
-        setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${i}`]);
-    }
-}
-
-function verifyIndexing(storedValue, prevElems, elemKeyId, i) {
-    // sets elem to readonly, clears its previous position in local storage,
-    // and stores the value. also overwrites local storage, in case the elem has been
-    // reindexed and is out of whack (due to a removed input pair triggering an index reshuffle)
-    setElemAttribute(document.querySelector(`#${elemKeyId}`));
-    storageAction('clear', elemKeyId)
-    storageAction('store', `txt-input${i}`, storedValue)
-
-}
-
-function removeInputPair(elem) { // removes selected input field. Also deletes the leftover date/ingredient input field paired with original input.
-
-    let currentElemIdNum = getInputIdNum(elem);
-    let pairedElemIdNum =  (isEven(currentElemIdNum) ? currentElemIdNum-1 : currentElemIdNum+1);
-
-    let pair = [currentElemIdNum, pairedElemIdNum]
-
-    pair.forEach(elemIdNum => {
-        try {
-            storageAction('clear', `txt-input${elemIdNum}`);
-            document.querySelector(`#txt-input${elemIdNum}`).remove();
-        }catch (e) {errorPrinter(e)}
-
-    })
-
-    shuffleIdIndex();
-}
-
-
-// ************************ Local Storage Manipulation ************************ //
-
-// Local storage manipulation algorithms.
-//
-// Designed to:
-// a: 'Seamlessly' sync the webpage GUI with localStorage...
-// b: Grab paired values from localStorage and pass them to GUI interface functions,
-// allowing for quick and efficient repopulation of the GUI on page reload...
-// c: Be modular, to make integration of features like pair deletion (and in the future,
-// view filters) more seamless...
-
-// The challange was, the algorithm had to be designed such that entirely seperate
-// localStorage items could be correlated (so each 'ingredient' could be linked with
-// its corresponding 'use-by-date').
-//
-// Functionality includes removing input pairs, saving inputs on button press,
-// automatically resolving indexing gaps after pair deletion
-// (i.e. input 1, 2, 5, 7 > 1, 2, 3, 4), auto-detection of unpaired values,
-// modular error analysis/decision-making/handling, and much, much more.
-
-
-function storeInputValue(event, elem) { // takes an event and an elem as arguments,
-    // and prepares values for use with storageAction. Additionally, refreshes the id index system.
-    try {
-        // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
-        // Guard clauses:
-        if (inputCount('current') === 0) {return}
-        if (inputEmpty(event.target.value) && inputEmpty(elem.value)) {
-            inputError();
-        }
-
-        if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
-            elem.forEach(elem => {
-                storageAction('store', elem.id, elem.value);
-                setElemAttribute(elem);
-            })
-        } else { // passed in as a single elem? do:
-            storageAction('store', elem.id, elem.value);
-            setElemAttribute(elem);
-        }
-        inputCount('none', true);
-
-        function inputError() {
-
-            // noinspection ExceptionCaughtLocallyJS
-            throw TypeError('Provided value is not of the correct format')
-        }
-    }catch (e) {
-        errorPrinter(e);
-        if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
-        return true;
-    }
-}
-
-function storeBulkInput(action, string = '', date) { // stores/retrives the bulk-input and bulk-date items from localStorage.
-
-    if (inputEmpty(string)) {return}
-    let list = string.split('\n')
-    list = list.join(',')
-
-    switch (action) {
-        case 'store':
-            date ? storageAction('store', 'bulk-date', list) : storageAction('store', 'bulk-ingredient', list)
-            break;
-        case 'combine':
-            let pairs = new Map()
-            let lenIng = storageAction('get', 'bulk-ingredient').split(',').length
-            let lenDate = storageAction('get', 'bulk-date').split(',').length
-            if (lenIng !== lenDate) {
-                let inputType = lenIng > lenDate ? 'date' : 'ingredient'
-                alertUser(`You are missing ${(lenIng-lenDate)/1} ${inputType} in bulk ${inputType} input`)
-                return;
-            }
-            for (let i = 0; i < lenIng; i++) { // set map and validate values
-
-                let ingredient = (storageAction('get', 'bulk-ingredient').split(',')[i])
-                let date = storageAction('get', 'bulk-date').split(',')[i]
-
-                if (inputEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
-
-                date = valiDate(date); // validate date value before it is stored
-                if (!date) {
-                    alertUser(`Incorrect/empty date value entered in bulk input: '${date} '`); return;
-                }
-
-                pairs.set(ingredient, date)
-            }
-
-            pairs.forEach((date, ingredient) => { // store each pair
-                storageAction('store', `txt-input${inputCount('stored', true)+1}`, ingredient);
-                storageAction('store', `txt-input${inputCount('stored', true)+1}`, date);
-            });
-            populatePage(); // repopulate the page
-    }
 }
 
 function inputCount(returnIndex = 'current', refreshStoredIndex = true) {
@@ -393,7 +292,25 @@ function storageAction(action, key, value='') {
     }
 }
 
-function shuffleIdIndex() { // fixes gaps in the id indexing of each input element by detecting if the previous element increments by more than 1.
+function removeInputPair(elem) { // removes selected input field. Also deletes the leftover date/ingredient input field paired with original input.
+
+    let currentElemIdNum = getInputIdNum(elem);
+    let pairedElemIdNum =  (isEven(currentElemIdNum) ? currentElemIdNum-1 : currentElemIdNum+1);
+
+    let pair = [currentElemIdNum, pairedElemIdNum]
+
+    pair.forEach(elemIdNum => {
+        try {
+            storageAction('clear', `txt-input${elemIdNum}`);
+            document.querySelector(`#txt-input${elemIdNum}`).remove()
+        }catch (e) {errorPrinter(e)}
+
+    })
+
+    shuffleInputs();
+}
+
+function shuffleInputs() { // fixes gaps in the indexing of each input element by detecting if the previous element increments by more than 1.
     let prevElemIdNum = 0;
     let idOffset = 0;
     let inputElems = [];
@@ -405,7 +322,7 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
     inputElems.forEach((elem) =>{
         let existingElemIdNum = getInputIdNum(elem);
 
-        // commence confusing maths that I blundered my way through
+        // commence complicated maths that I blundered my way through
         if (existingElemIdNum > prevElemIdNum - idOffset + 1) {
             idOffset = existingElemIdNum - prevElemIdNum; // the gap between the IDs
             reshuffledId = (existingElemIdNum - idOffset) + 1
@@ -422,8 +339,6 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
     })
 }
 
-// ************* Mini helpers ************* //
-
 function getInputIdNum(inputElemId) { // returns the numeric index assigned to my single-input fields IDs
     // should only be passed this form of id: txt-input(index value here)
 
@@ -436,6 +351,7 @@ function getInputIdNum(inputElemId) { // returns the numeric index assigned to m
         return null;
     }
 }
+
 function nullElem(elem) {// Check if an element is null
     if (elem === null) {
         console.trace(elem);
@@ -444,19 +360,7 @@ function nullElem(elem) {// Check if an element is null
     }
     return false;
 }
-function inputEmpty(value) {
-    try {value.trim();} catch {return true;}
-    switch (value) {
-        case undefined:
-        case 'undefined':
-        case null:
-        case 'null':
-        case '':
-            return true;
-        default:
-            return false;
-    }
-}
+
 function isEven(value) {
     parseInt(value);
     return value % 2 === 0;
@@ -465,28 +369,9 @@ function isEven(value) {
 function pageName(page) {
     return document.location.pathname.includes(`${page}.html`);
 }
-function errorPrinter(e) { // lazy programming, aka modularity
+function errorPrinter(e) { // this has to be ultimate lazy programming (aka modularity)
     let startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
     // (must be the function that the error happened in)
     let functionName = startPos.substring(0, startPos.search(/\(/));
     console.warn('Error in function ' + functionName.trim() + '()');
-}
-function valiDate(date) {
-    try {
-        // validation tests:
-        date.trim()
-        if (inputEmpty(date)) {return false}
-        if (/[^\d\s\/-]/g.test(date)) {return false} // anything other than whitespace, digits, slashes or dashed? invalid date.
-        date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
-        date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
-
-        // (dates should be valid, within range, and seperated by '-' up to this point)
-        // format correction:
-
-        return date.match(/-\d{4}\b/g)[0] !== null ? manipulateDate(date) : date // year is in the expected position & format? convert the date to ISO format
-    }
-    catch {
-        date = manipulateDate(date, false, new Date().getFullYear()) // the year is null/doesn't exist
-        return valiDateYear(date) // hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha im going insane
-    }
 }
