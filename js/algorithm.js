@@ -66,7 +66,7 @@ function makeElement(parentElem, classes, elemType) {
     return elem;
 }
 
-// ToDo: make 'close matches' viewable:
+/*// ToDo: make 'close matches' viewable:
 function matchString(query = '', searchString, wordMatch) {// returns A: type of match, if successful,
     // B: words matched, if wordMatch === true, or C: null if match fails
     let matches = [];
@@ -85,7 +85,7 @@ function matchString(query = '', searchString, wordMatch) {// returns A: type of
         })
     }
     return null;
-}
+}*/
 
 
 

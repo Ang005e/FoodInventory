@@ -77,13 +77,16 @@ fieldset {
 .txt-bulk {
     display: block;
     margin-block-start: 20px;: ;
-    width: 20vw;
-    height: 50px;
+    width: 48.2vw;
+    height: 20vh;
 }
-.field-bulk-input label {
-    display: block;
-    width: 20vw;
-    height: fit-content;
+#field-bulk label:first-of-type, #txt-bulk-input {
+    float: left;
+    clear: left;
+}
+#field-bulk label:last-of-type, #txt-bulk-date {
+    position: relative;
+    left: 1.8vw;
 }
 
 button {
@@ -214,13 +217,17 @@ div.inventory {
         overflow-x: auto;
         grid-auto-flow: row;
     }
-
     fieldset {
         width: 48.5vw;
         margin-left: 1vw;
         height: 37vh;
     }
-
+    #field-bulk {
+        grid-area: 2 / 1;
+        grid-column-start: -3;
+        grid-column-end: -1;
+        width: revert;
+    }
 }
 
 @media only screen and (min-width: 1600px) {

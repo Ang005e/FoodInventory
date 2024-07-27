@@ -32,14 +32,11 @@
                     <label>Input Use-By Date:</label>
                 </fieldset>
 
-                <fieldset id="field-bulk-ingredient" class="field-bulk-input" disabled="disabled">
-                    <label for="txt-bulk-input">Input Comma-Seperated Ingredients:</label>
-                    <input type="text" id="txt-bulk-input" name="txt-bulk-input" class="txt-bulk">
-                </fieldset>
-
-                <fieldset id="field-bulk-date" class="field-bulk-input" disabled="disabled">
-                    <label for="txt-bulk-date">Input Comma-Seperated Dates:</label>
-                    <input type="text" id="txt-bulk-date" name="txt-bulk-date" class="txt-bulk">
+                <fieldset id="field-bulk">
+                    <label for="txt-bulk-input">Input Ingredients (one per line): </label>
+                    <textarea name="txt-bulk-input" id="txt-bulk-input" class="txt-bulk"></textarea>
+                    <label for="txt-bulk-date">Input Dates (one per line):</label>
+                    <textarea name="txt-bulk-date" id="txt-bulk-date" class="txt-bulk"></textarea>
                 </fieldset>
             </form>
         </main>
