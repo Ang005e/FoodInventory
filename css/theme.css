@@ -80,7 +80,7 @@ fieldset {
     width: 48.2vw;
     height: 20vh;
 }
-#field-bulk label:first-of-type, #txt-bulk-input {
+#field-bulk label:first-of-type, #txt-bulk-ingredient {
     float: left;
     clear: left;
 }
