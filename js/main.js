@@ -8,7 +8,6 @@ let _timeoutPromise;
 let _dummyDataTest = false;
 //get fked globals
 
-
 // ************ CALLBACK FUNCTIONS (LISTENERS) ************
 
 // Add input fields on the click of a button:
@@ -229,7 +228,7 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
 }
 
 function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
-    let prevElems = inputCount('stored', false);
+    let prevElems = !_dummyDataTest ? inputCount('stored', false) : inputCount('stored', true);
     for (let j = 1; j <= prevElems; j++) {
 
         let elemKeyId = `txt-input${j}`

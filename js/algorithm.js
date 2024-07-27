@@ -4,6 +4,8 @@ if (pageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
         loadRecipes();
+        //ToDo:
+        matchString('1234 1243', '1234 5678 1243 9823123212344321', true);
     });
     document.querySelector('#btn-continue').addEventListener('click', function(){
         location.href = 'index.html';
@@ -64,11 +66,35 @@ function makeElement(parentElem, classes, elemType) {
     return elem;
 }
 
+// ToDo: make 'close matches' viewable:
+function matchString(query = '', searchString, wordMatch) {// returns A: type of match, if successful,
+    // B: words matched, if wordMatch === true, or C: null if match fails
+    let matches = [];
+
+    let exactMatch = new RegExp("^.*?$", 'i')
+    let caseMatch = new RegExp(query, 'i');
+
+    console.log(searchString.match(exactMatch))
+    //if (caseMatch.test(searchString)) {return 'case-insensitive'}
+
+    if (wordMatch) {
+        query.split(' ').forEach((substr) => {
+            let match = new RegExp(substr, '').exec(query) // matches whole words
+            console.log(match)
+            if (match !== null) {matches.push(match[0])}
+        })
+    }
+    return null;
+}
+
+
+
+
 /*
 chuffed with this sly use of arrays it's useless now tho.
 function getIngredients() {
     let ingredients = [];
-    let numIterations = [handleBulkInput(), inputCount('stored', false)]; // this
+    let numIterations = [handleBulkInput(), inputElemIdIndex('stored', false)]; // this
     // is an array with items that refer to the number of storage items in each separate storage-key-naming-scheme (i.e.
     // bulkInput(index) or txtInput(index). The array stores the (index) part). It's used to gracefully manipulate localStorage.
 
