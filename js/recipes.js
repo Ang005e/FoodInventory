@@ -1,5 +1,5 @@
-let recipeClasses;
-let allIngredients;
+let RecipeClasses;
+let IngredientClasses;
 
 // ************** CLASSES ************** //
 
@@ -151,7 +151,7 @@ const chives = new Ingredient('chives', 'herb', 'root herb', ['garlic chives']);
 
 const ginger = new Ingredient('ginger', 'vegetable', 'root spice', ['fresh ginger', 'ground ginger']);
 
-allIngredients = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, shallot, leek,
+IngredientClasses = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, shallot, leek,
     springOnion, mushroom, milk, butter, cheese, yogurt, apple, tomato, cucumber,
     almond, peanut, parsley, basil, chives, ginger];
 

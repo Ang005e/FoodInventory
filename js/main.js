@@ -8,7 +8,6 @@ let _timeoutPromise;
 let _dummyDataTest = false;
 //get fked globals
 
-
 // ************ CALLBACK FUNCTIONS (LISTENERS) ************
 
 // Add input fields on the click of a button:
@@ -33,14 +32,14 @@ if (pageName('index')) {
         let d = 0;
         let m = 0;
         storageAction('clear-all', '');
-        allIngredients.forEach((ingredient)=> {
-            let x = Math.round(Math.random() * 10);
+        IngredientClasses.forEach((ingredient)=> {
             d++;m++;
             (d > 29) && (d=1); (m > 12) && (m = 1);
             (d < 10) && (d = `0${d}`); (m < 10) && (m = `0${m}`);
             storageAction('store', `txt-input${++i}`, ingredient.ingName)
             storageAction('store', `txt-input${++i}`, `${(Math.round(i/2))+2000}-${m}-${d}`)
         })
+        removeAllInputs();
         repopulatePage();
         location.reload()
     })
@@ -229,7 +228,7 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
 }
 
 function repopulatePage() { // repopulates the elements on the page when the user reloads and locally stored values are avalable
-    let prevElems = inputCount('stored', false);
+    let prevElems = !_dummyDataTest ? inputCount('stored', false) : inputCount('stored', true);
     for (let j = 1; j <= prevElems; j++) {
 
         let elemKeyId = `txt-input${j}`
@@ -302,15 +301,15 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
     pair.forEach(elemIdNum => {
         try {
             storageAction('clear', `txt-input${elemIdNum}`);
-            document.querySelector(`#txt-input${elemIdNum}`).remove()
+            document.querySelector(`#txt-input${elemIdNum}`).remove();
         }catch (e) {errorPrinter(e)}
 
     })
 
-    shuffleInputs();
+    shuffleIdIndex();
 }
 
-function shuffleInputs() { // fixes gaps in the indexing of each input element by detecting if the previous element increments by more than 1.
+function shuffleIdIndex() { // fixes gaps in the id indexing of each input element by detecting if the previous element increments by more than 1.
     let prevElemIdNum = 0;
     let idOffset = 0;
     let inputElems = [];
@@ -322,7 +321,7 @@ function shuffleInputs() { // fixes gaps in the indexing of each input element b
     inputElems.forEach((elem) =>{
         let existingElemIdNum = getInputIdNum(elem);
 
-        // commence complicated maths that I blundered my way through
+        // commence confusing maths that I blundered my way through
         if (existingElemIdNum > prevElemIdNum - idOffset + 1) {
             idOffset = existingElemIdNum - prevElemIdNum; // the gap between the IDs
             reshuffledId = (existingElemIdNum - idOffset) + 1

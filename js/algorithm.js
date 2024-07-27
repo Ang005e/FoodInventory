@@ -4,8 +4,6 @@ if (pageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
         loadRecipes();
-        //ToDo:
-        matchString('1234 1243', '1234 5678 1243 9823123212344321', true);
     });
     document.querySelector('#btn-continue').addEventListener('click', function(){
         location.href = 'index.html';
@@ -87,14 +85,11 @@ function matchString(query = '', searchString, wordMatch) {// returns A: type of
     return null;
 }
 
-
-
-
 /*
 chuffed with this sly use of arrays it's useless now tho.
 function getIngredients() {
     let ingredients = [];
-    let numIterations = [handleBulkInput(), inputCount('stored', false)]; // this
+    let numIterations = [handleBulkInput(), inputElemIdIndex('stored', false)]; // this
     // is an array with items that refer to the number of storage items in each separate storage-key-naming-scheme (i.e.
     // bulkInput(index) or txtInput(index). The array stores the (index) part). It's used to gracefully manipulate localStorage
 
