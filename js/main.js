@@ -29,13 +29,15 @@ if (pageName('index')) {
     document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
         let i = 0;
-        let y = 0;
+        let d = 0;
+        let m = 0;
         storageAction('clear-all', '');
         IngredientClasses.forEach((ingredient)=> {
-            let x = Math.round(Math.random() * 10);
-            (y > 29) && (y=0);
+            d++;m++;
+            (d > 29) && (d=1); (m > 12) && (m = 1);
+            (d < 10) && (d = `0${d}`); (m < 10) && (m = `0${m}`);
             storageAction('store', `txt-input${++i}`, ingredient.ingName)
-            storageAction('store', `txt-input${++i}`, `${++y}-${x}-${x}${x}${x}${x}`)
+            storageAction('store', `txt-input${++i}`, `${(Math.round(i/2))+2000}-${m}-${d}`)
         })
         removeAllInputs();
         repopulatePage();
