@@ -79,9 +79,8 @@ fieldset {
     margin-block-start: 20px;: ;
     width: 48.2vw;
     height: 20vh;
-    overflow: scroll;
 }
-#field-bulk label:first-of-type, #txt-bulk-ingredient {
+#field-bulk label:first-of-type, #txt-bulk-input {
     float: left;
     clear: left;
 }
@@ -146,7 +145,7 @@ h1 {
 
 /* Ingredients and dates */
 
-#scrollContainer { /*oops*/
+#scrollContainer {
     grid-area: 1 / 1 / span 1 / span 2;
     height: max-content;
 }
