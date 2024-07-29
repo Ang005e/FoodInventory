@@ -336,21 +336,26 @@ function storeBulkInput(action, string = '', date) { // stores/retrives the bulk
                 alertUser(`You are missing ${(lenIng-lenDate)/1} ${inputType} in bulk ${inputType} input`)
                 return;
             }
-            for (let i = 0; i < lenIng; i++) {
-                pairs.set(storageAction('get', 'bulk-ingredient').split(',')[i],
-                    storageAction('get', 'bulk-date').split(',')[i])
+            for (let i = 0; i < lenIng; i++) { // set map and validate values
+
+                let ingredient = (storageAction('get', 'bulk-ingredient').split(',')[i])
+                let date = storageAction('get', 'bulk-date').split(',')[i]
+
+                if (inputEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
+
+                date = valiDate(date); // validate date value before it is stored
+                if (!date) {
+                    alertUser(`Incorrect/empty date value entered in bulk input: '${date} '`); return;
+                }
+
+                pairs.set(ingredient, date)
             }
 
-            pairs.forEach((date, ingredient) => {
+            pairs.forEach((date, ingredient) => { // store each pair
                 storageAction('store', `txt-input${inputCount('stored', true)+1}`, ingredient);
-
-                let year = date.match(/\d\d\d\d/g)[0]
-                date = date.replaceAll('-' + year, '')
-                date = date.replaceAll(/^/g, year + '-')
-                debugger
                 storageAction('store', `txt-input${inputCount('stored', true)+1}`, date);
             });
-            populatePage();
+            populatePage(); // repopulate the page
     }
 }
 
@@ -465,4 +470,23 @@ function errorPrinter(e) { // lazy programming, aka modularity
     // (must be the function that the error happened in)
     let functionName = startPos.substring(0, startPos.search(/\(/));
     console.warn('Error in function ' + functionName.trim() + '()');
+}
+function valiDate(date) {
+    try {
+        // validation tests:
+        date.trim()
+        if (inputEmpty(date)) {return false}
+        if (/[^\d\s\/-]/g.test(date)) {return false} // anything other than whitespace, digits, slashes or dashed? invalid date.
+        date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
+        date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
+
+        // (dates should be valid, within range, and seperated by '-' up to this point)
+        // format correction:
+
+        return date.match(/-\d{4}\b/g)[0] !== null ? manipulateDate(date) : date // year is in the expected position & format? convert the date to ISO format
+    }
+    catch {
+        date = manipulateDate(date, false, new Date().getFullYear()) // the year is null/doesn't exist
+        return valiDateYear(date) // hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha im going insane
+    }
 }
