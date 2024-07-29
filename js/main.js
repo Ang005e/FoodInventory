@@ -1,14 +1,15 @@
 // noinspection SpellCheckingInspection
 
 
-// ****** GLOBALS ******
+//region ****** GLOBALS ******
 
 let _focusedElem;
 let _timeoutPromise;
 let _dummyDataTest = false;
-//get fked globals
+//endregion get fked globals
 
-// ************ CALLBACK FUNCTIONS (LISTENERS) ************
+
+//region ************ EVENT LISTENERS ************
 
 // Add input fields on the click of a button:
 document.querySelectorAll('.btn-ingredient').forEach((elem)=> {
@@ -49,9 +50,10 @@ function focusListener(elem) {
     }
     document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
 }
+//endregion
 
 
-// ************ MAIN FUNCTION ************
+//region ************ MAIN FUNCTION ************
 
 function eventCentre(event) {
     // Centralises and manages events, and makes it MUCH easier to debug and understand.
@@ -109,8 +111,9 @@ function eventCentre(event) {
         switch (event.target.id) {
             case 'btn-add-input':
 
-                if (nullElem(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
+                if (valueEmpty(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
                     createInput(inputCount() + 1);
+                    console.log('element identified as null value - no elements should be on screen.')
                     return;
                 }
                 issue = storeInputValue(event, elem);
@@ -139,9 +142,10 @@ function eventCentre(event) {
         errorPrinter(e)
     }
 }
+//endregion
 
 
-// ************ GUI/HTML & CSS Manipulation Functions ************ //
+//region ************ GUI/HTML & CSS Manipulation Functions ************ //
 
 function removeAllInputs() {
     document.querySelectorAll('.single-input').forEach((elem) => {
@@ -183,6 +187,10 @@ function setFieldsetInput(element, fieldsetNum, text = '', attributes=[], values
     }
 }
 
+/**
+ * Displays a `message` to the user.
+ * @param message Message to display.
+ */
 function alertUser(message) {
     let alertDiv = document.querySelector('#alert-div');
     alertDiv.innerHTML = '';
@@ -202,14 +210,17 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
         console.log('event may not be linked with an item entry')
     }
 }
+//endregion
 
 
-// ************************ Modular Page Population ************************ //
+//region ************************ Modular Page Population ************************ //
 // populates the screen with paired elems and their
 // corresponding data/text/date values.
 
-function populatePage() { // repopulates the elements on the page when the user reloads (locally stored values must be avalable)
-
+/**
+ * Retrives historic user data from localStorage, and repopulates previously displayed elements onto the page.
+ */
+function populatePage() {
     // collect the elements in local storage, plus those already on the page.
     let prevElems = inputCount('stored', true)
     let currentElems = inputCount('current', true);
@@ -220,33 +231,43 @@ function populatePage() { // repopulates the elements on the page when the user 
         let storedValue = storageAction('get', elemKeyId) // (the value of the existing element in local storage)
 
         alternateFields(storedValue, i);
-        verifyIndexing(storedValue, prevElems, elemKeyId, i);
+        verifyIndexing(storedValue, elemKeyId);
         }
     inputCount('none', true);
 }
 
-function alternateFields(storedValue, i) {
-    if (!isEven(i)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even
-        // set the chosen elem to its old value
-        setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${i}`]);
+/**
+ * @description Determines which item of the pair the argued element is, given the id index, and initiates creation and configuration of the appropriate type of fieldset.
+ * @description Designed specifically for use with my alternating ID system.
+ * @param storedValue
+ * @param idIndex
+ */
+function alternateFields(storedValue, idIndex) {
+    if (!isEven(idIndex)) { // Check which elem type of the pair it is, depending on if the ID index is odd or even, then set the chosen elem to its old value
+        // looks like it's a date input...
+        setFieldsetInput('input', 1, storedValue, ['type', 'class', 'id'], ['text', 'ingredient-input single-input', `txt-input${idIndex}`]);
     } else {
-        setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${i}`]);
+        // looks like it's an ingredient input...
+        setFieldsetInput('input', 2, storedValue, ['type', 'class', 'id'], ['date', 'date-input single-input', `txt-input${idIndex}`]);
     }
 }
 
-function verifyIndexing(storedValue, prevElems, elemKeyId, i) {
-    // sets elem to readonly, clears its previous position in local storage,
-    // and stores the value. also overwrites local storage, in case the elem has been
-    // reindexed and is out of whack (due to a removed input pair triggering an index reshuffle)
-    setElemAttribute(document.querySelector(`#${elemKeyId}`));
-    storageAction('clear', elemKeyId)
-    storageAction('store', `txt-input${i}`, storedValue)
-
+/**
+ * Sets an elem to readonly, clears its previous position in local storage,
+ * and stores the value. Overwrites local storage, in case the elem has been
+ * reindexed and is out of whack (due to a removed input pair triggering an index reshuffle).
+ * @param storedValue Value stored to localStorage
+ * @param elemId ID assigned to the given element
+ */
+function verifyIndexing(storedValue, elemId) {
+    setElemAttribute(document.querySelector(`#${elemId}`));
+    storageAction('clear', elemId)
+    storageAction('store', elemId, storedValue)
 }
 
 function removeInputPair(elem) { // removes selected input field. Also deletes the leftover date/ingredient input field paired with original input.
 
-    let currentElemIdNum = getInputIdNum(elem);
+    let currentElemIdNum = getIdIndex(elem);
     let pairedElemIdNum =  (isEven(currentElemIdNum) ? currentElemIdNum-1 : currentElemIdNum+1);
 
     let pair = [currentElemIdNum, pairedElemIdNum]
@@ -261,9 +282,10 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
 
     shuffleIdIndex();
 }
+//endregion
 
 
-// ************************ Local Storage Manipulation ************************ //
+//region ************************ Local Storage Manipulation ************************ //
 
 // Local storage manipulation algorithms.
 //
@@ -290,7 +312,7 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
         // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
         // Guard clauses:
         if (inputCount('current') === 0) {return}
-        if (inputEmpty(event.target.value) && inputEmpty(elem.value)) {
+        if (valueEmpty(event.target.value) && valueEmpty(elem.value)) {
             inputError();
         }
 
@@ -319,7 +341,7 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
 
 function storeBulkInput(action, string = '', date) { // stores/retrives the bulk-input and bulk-date items from localStorage.
 
-    if (inputEmpty(string)) {return}
+    if (valueEmpty(string)) {return}
     let list = string.split('\n')
     list = list.join(',')
 
@@ -333,7 +355,7 @@ function storeBulkInput(action, string = '', date) { // stores/retrives the bulk
             let lenDate = storageAction('get', 'bulk-date').split(',').length
             if (lenIng !== lenDate) {
                 let inputType = lenIng > lenDate ? 'date' : 'ingredient'
-                alertUser(`You are missing ${(lenIng-lenDate)/1} ${inputType} in bulk ${inputType} input`)
+                alertUser(`You are missing ${Math.abs(lenIng-lenDate)} ${inputType} in bulk ${inputType} input`)
                 return;
             }
             for (let i = 0; i < lenIng; i++) { // set map and validate values
@@ -341,11 +363,11 @@ function storeBulkInput(action, string = '', date) { // stores/retrives the bulk
                 let ingredient = (storageAction('get', 'bulk-ingredient').split(',')[i])
                 let date = storageAction('get', 'bulk-date').split(',')[i]
 
-                if (inputEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
+                if (valueEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
 
                 date = valiDate(date); // validate date value before it is stored
                 if (!date) {
-                    alertUser(`Incorrect/empty date value entered in bulk input: '${date} '`); return;
+                    alertUser(date); return;
                 }
 
                 pairs.set(ingredient, date)
@@ -400,10 +422,10 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
     let reshuffledId = 0;
 
     // sort the elements in acending order based on their id:
-    document.querySelectorAll('.single-input').forEach(elem => inputElems[getInputIdNum(elem)] = elem)
+    document.querySelectorAll('.single-input').forEach(elem => inputElems[getIdIndex(elem)] = elem)
 
     inputElems.forEach((elem) =>{
-        let existingElemIdNum = getInputIdNum(elem);
+        let existingElemIdNum = getIdIndex(elem);
 
         // commence confusing maths that I blundered my way through
         if (existingElemIdNum > prevElemIdNum - idOffset + 1) {
@@ -421,31 +443,37 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
 
     })
 }
+//endregion
 
-// ************* Mini helpers ************* //
 
-function getInputIdNum(inputElemId) { // returns the numeric index assigned to my single-input fields IDs
-    // should only be passed this form of id: txt-input(index value here)
+//region ************* Mini helpers *************
 
-    inputElemId = (inputElemId instanceof Element) ? inputElemId.id : inputElemId;
+/**
+ * The `getIdIndex()` function searches for a valid index value within the `id` property of an {@link`Element`}.
+ * @description "Valid" means any number, of any length, that is located at the end of the `id` string.
+ * @param {Element, string} identifier An {@link`Element`} object, or `id` property.
+ * @returns {number} An index value associated with the `id`, or `null`.
+ */
+function getIdIndex(identifier) { //
+    debugger
+    identifier = (identifier instanceof Element) ? identifier.id : identifier;
     try {
-        console.log(inputElemId.split('t')[3])
-        return parseInt(inputElemId.split('t')[3]);
+        identifier = identifier.match(/\d+$/)[0]; // any length of number, at the end of the string
+        console.log(identifier)
+        return parseInt(identifier);
     }catch (e) {
         errorPrinter(e);
-        return null;
     }
 }
-function nullElem(elem) {// Check if an element is null
-    if (elem === null) {
-        console.trace(elem);
-        console.log('elem identified as null value - there should be no elements on screen. \n if there are, there\'\s an issue');
-        return true;
-    }
-    return false;
-}
-function inputEmpty(value) {
-    try {value.trim();} catch {return true;}
+
+/**
+ * Checks if a value is an empty string, null, or undefined.
+ * @param {*} value Value to be checked
+ * @returns {boolean}
+ */
+function valueEmpty(value) {
+
+    try {value.trim()} catch {return true}
     switch (value) {
         case undefined:
         case 'undefined':
@@ -471,16 +499,26 @@ function errorPrinter(e) { // lazy programming, aka modularity
     let functionName = startPos.substring(0, startPos.search(/\(/));
     console.warn('Error in function ' + functionName.trim() + '()');
 }
+
+/**
+ * Convert `date` to the standard ISO date format (yyyy-mm-dd) so it can be passed back to a HTML date input.
+ * @param date A date in one of the following formats: `dd/mm/yyyy`, `dd/mm`, `d/m` or `yyyy`. Can be seperated by whitespace ' ', dash '-', or slash '/'
+ * @returns {[string, string, string]|string|boolean} yyyy-mm-dd, or false if there's an issue
+ */
 function valiDate(date) {
     try {
         // validation tests:
         date.trim()
-        if (inputEmpty(date)) {return false}
-        if (/[^\d\s\/-]/g.test(date)) {return false} // anything other than whitespace, digits, slashes or dashed? invalid date.
+        if (valueEmpty(date)) {return `A paired date is empty. Check for newlines in the bulk-input fields.`}
+        if (/[^\d\s\/-]/g.test(date)) {return `A date contains invalid characters: ${date}`} // anything other than whitespace, digits, slashes or dashed? invalid date.
         date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
         date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
+        date = date.match(/^\d{4}$/) ? `${date}-06-06` : date; // If only the year was passed, just do the lazy programmer thing
+        let validationResult = validateMonth(date)
+        debugger
+        if (validationResult !== true) {return `There's an issue with your date: ${date} (${validationResult})`}
 
-        // (dates should be valid, within range, and seperated by '-' up to this point)
+        // dates should be valid and seperated by '-' up to this point
         // format correction:
 
         return date.match(/-\d{4}\b/g)[0] !== null ? manipulateDate(date) : date // year is in the expected position & format? convert the date to ISO format
@@ -490,3 +528,4 @@ function valiDate(date) {
         return valiDateYear(date) // hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha im going insane
     }
 }
+//endregion

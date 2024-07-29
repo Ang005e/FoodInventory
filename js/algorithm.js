@@ -4,6 +4,8 @@ if (pageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
         loadRecipes();
+        //ToDo:
+        //matchString('1234 1243', '1234 5678 1243 9823123212344321', true);
     });
     document.querySelector('#btn-continue').addEventListener('click', function(){
         location.href = 'index.html';
@@ -91,8 +93,16 @@ function valiDateYear(date) { // checks that the year is in the future, and retu
         return false
     }
 }
-function manipulateDate(date, split = false, arguedYear = null) { // returns formatted OR split date.
-    // Is passed full (dd-mm-yyyy) or partial (dd-mm) date. If partial date is passed, year must be passed too.
+
+/**
+ *
+ * @param date full (dd-mm-yyyy) or partial (dd-mm) date.
+ * @param split returns split date if set as true.
+ * @param arguedYear If partial date is passed, year must be passed too.
+ * @returns {[year,month,day]|string} returns date formatted in ISO format, or the year, month, and day in an array.
+ */
+function manipulateDate(date, split = false, arguedYear = null) { // .
+    //
     let year = arguedYear !== null;
     let ISOFormat = /^\d{4}/.test(date);
     (!year) && (arguedYear = date.match(/\d{4}/)[0]) // set year as the year found by the search pattern
@@ -104,8 +114,30 @@ function manipulateDate(date, split = false, arguedYear = null) { // returns for
     }
 
     function sendDate([val1, val2], split) {
+        debugger
         if (split) return [val1, val2[1], val2[2]];
         return `${val1}-${val2[0]}`
+    }
+}
+
+function validateMonth(date) { // Check that date is within correct bounds for the given month
+    let month = manipulateDate(date, true)[1] // returns only the month
+    let day = parseInt(manipulateDate(date, true)[2]) // returns only the day
+    if (day < 1) return false; // lol
+
+    switch (true) {
+        case (parseInt(month) > 0) && !(parseInt(month) <= 12): // month is out of bounds
+            return 'the month is invalid';
+
+        case /04|06|09|11/.test(month): // 31 month
+            return day <= 31 ? true : 'the days are over 31';
+
+        case /01/.test(month): // feb
+            if ((manipulateDate(date, true)[0] % 4) !== 0) {return "don't you bloody dare try a leap year on me you bastard, it's 1am and I'm DONE coding for the night"} // leap year?
+            return day <= 29 ? true : 'days are over 29';
+
+        default: // must be a 30 date
+            return day <= 30 ? true : 'days are over 30';
     }
 }
 
