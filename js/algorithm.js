@@ -66,6 +66,51 @@ function makeElement(parentElem, classes, elemType) {
     return elem;
 }
 
+
+//ToDo ensure the date is valid (days/months are within correct range)
+function valiDateYear(date) { // checks that the year is in the future, and returns a valid future date if mm/dd is entered without a year.
+
+    let month = new Date().getMonth()+1
+    let day = new Date().getDate()
+
+    let futureDate = manipulateDate(date, false, new Date().getFullYear() + 1); // one year in the future
+
+    let arguedDay = parseInt(manipulateDate(date, true)[2])
+    let arguedMonth = parseInt(manipulateDate(date, true)[1])
+
+    // make sure dates are only passed through this when entered (without a year),
+    // as otherwise off ingredients will magically become fresh again...
+
+    if (arguedMonth > month) { // the argued month is in the future
+        return manipulateDate(date);
+    }else if ((arguedMonth === month) && (arguedDay >= day)) { // the argued month is current, and the day is either current or in the future
+        return manipulateDate(date);
+    }else if (arguedMonth < month) { // the argued month is in the past
+        return futureDate
+    }else if ((arguedMonth === month) && (arguedDay < day)) { // the argued month is current, but the day is in the past
+        return futureDate
+    }else {
+        return false
+    }
+}
+function manipulateDate(date, split = false, arguedYear = null) { // returns formatted OR split date.
+    // Is passed full (dd-mm-yyyy) or partial (dd-mm) date. If partial date is passed, year must be passed too.
+    let year = arguedYear !== null;
+    let ISOFormat = /^\d{4}/.test(date);
+    (!year) && (arguedYear = date.match(/\d{4}/)[0]) // set year as the year found by the search pattern
+
+    if (ISOFormat) {
+        return sendDate([arguedYear, date.match(/(\d\d)-(\d\d$)/)], split)
+    }else {
+        return sendDate([arguedYear, date.match(/(^\d\d)-(\d\d)/)], split)
+    }
+
+    function sendDate([val1, val2], split) {
+        if (split) return [val1, val2[1], val2[2]];
+        return `${val1}-${val2[0]}`
+    }
+}
+
 /*// ToDo: make 'close matches' viewable:
 function matchString(query = '', searchString, wordMatch) {// returns A: type of match, if successful,
     // B: words matched, if wordMatch === true, or C: null if match fails
