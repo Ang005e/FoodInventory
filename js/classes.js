@@ -155,10 +155,13 @@ class UseByDate {
 
         let currentMonth = new Date().getMonth() + 1 // +1 because getMonth() starts at month 0
         let currentDay = new Date().getDate()
-        let nextYear = (new Date().getFullYear() + 1).toString()
+        let currentYear = (new Date().getFullYear()).toString()
 
-        if (this.Year < nextYear-1) { // argued year is in the past
+        if (year < currentYear) { // argued year is in the past
             alertUser(`A year you entered is in the past. Are you sure this is correct?`)
+            return year
+        }else if (year > currentYear) { // argued year is in the future
+            return year
         }
 
         // make sure dates are only passed through this when entered (without a Year),
@@ -168,11 +171,11 @@ class UseByDate {
         }else if ((this.Month === currentMonth) && (this.Day >= currentDay)) { // the argued Month is current, and the Day is either current or in the future
             return year;
         }else if (this.Month < currentMonth) { // the argued Month is in the past
-            return nextYear;
+            return currentYear + 1;
         }else if ((this.Month === currentMonth) && (this.Day < currentDay)) { // the argued Month is current, but the Day is in the past
-            return nextYear;
+            return currentYear + 1;
         }else {
-            this.dateError(`There was an error with the year you entered: ${this.Year}`)
+            this.dateError(`There was an error with the year you entered: ${year}`)
         }
     }
     validDateBounds() { // Check that Date is within correct bounds for the given Month

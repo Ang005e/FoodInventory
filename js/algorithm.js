@@ -12,20 +12,19 @@ if (pageName('inventory')) {
 // Main code. Runs on page load/reload. Populates elems with ingredients and use-by-dates.
 function pageLoad() { 
     try {
-        let dateI = 0;
-        let IngredientI = 0;
+        let i = 0;
+        let prevI = 0;
+
         getIngredients(true).forEach((ingredient) => {
             let parentElem = document.querySelector('#ingredientDisplay');
             let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = ingredient.toString();
-            dateI++
         })
         getIngredients(false, true).forEach((value) => {
             let date = new UseByDate(value).DMYFormat; //convert to DMY
             let parentElem = document.querySelector('#dateDisplay');
             let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = date;
-            IngredientI++
         })
     }catch (errorObj) {
         errorCentre(errorObj);

@@ -36,7 +36,7 @@ if (pageName('index')) {
             (d > 29) && (d=1); (m > 12) && (m = 1);
             (d < 10) && (d = `0${d}`); (m < 10) && (m = `0${m}`);
             storageAction('store', `txt-input${++i}`, ingredient.ingName)
-            storageAction('store', `txt-input${++i}`, `${(Math.round(i/2))+2000}-${m}-${d}`)
+            storageAction('store', `txt-input${++i}`, `2026-${m}-${d}`)
         })
         removeAllInputs();
         populatePage();
@@ -113,7 +113,7 @@ function eventCentre(event) {
         switch (event.target.id) {
             case 'btn-add-input':
 
-                if (valueEmpty(elem)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
+                if (valueEmpty(elem) || valueEmpty(elem.id)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
                     createInput(inputCount() + 1);
                     console.log('element identified as null value - no elements should be on screen.')
                     return;
@@ -133,7 +133,8 @@ function eventCentre(event) {
                 removeAllInputs();
                 return;
             case 'btn-continue':
-                storeInputValue(event, elem);
+                storeInputValue(event, elem)
+
                 skipCreation = true;
                 location.href = 'inventory.html';
                 return;
@@ -314,7 +315,7 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
         // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
         // Guard clauses:
         if (inputCount('current') === 0) {return}
-        if (valueEmpty(event.target.value) && valueEmpty(elem.value)) {
+        if (valueEmpty(event.target.value) && valueEmpty(elem.value) && (event.target.id !== 'btn-continue')) {
             inputError();
         }
 
@@ -454,7 +455,6 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
  * @returns {number} An index value associated with the `id`, or `null`.
  */
 function getIdIndex(identifier) { //
-    debugger
     identifier = (identifier instanceof Element) ? identifier.id : identifier;
     try {
         identifier = identifier.match(/\d+$/)[0]; // any length of number, at the end of the string
