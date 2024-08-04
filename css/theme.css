@@ -8,29 +8,45 @@
     border-collapse: collapse;
     overflow: hidden;
     scrollbar-width: thin;
+    color: #333333;
+    border-color: darkgray;
 }
 main {
     scrollbar-gutter: stable;
     overflow-y: auto;
     height: 80vh;
-    background-color: antiquewhite;
+    background-color: rgba(205, 205, 206, 0.9);
 }
-
-header {
+main.inventory {
+    background-color: #F5F5F5;
+}
+header, footer {
+    border: 3px solid;
     height: 10vh;
-    background-color: bisque;
+    background-color: rgba(128, 128, 128, 0.85);
 }
-footer {
-    height: 10vh;
-    background-color: bisque;
-}
-
 h1 {
     text-align: center;
 }
 p, label {
     font-family: sans-serif;
 }
+button {
+    color: #333333;
+    border-color: white;
+    background-color: #FFD700;
+    margin-block: 2px;
+    margin-top: 10px;
+    padding-block: 4px;: ;
+}
+fieldset {
+    background-color: #F5F5F5;
+}
+fieldset:first-of-type, fieldset:nth-of-type(2) {
+    padding-block: 8px;
+    padding-inline: 12px;
+}
+
 #alert-div {
     position: relative;
     height: 4vh;

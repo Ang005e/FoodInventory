@@ -66,23 +66,152 @@ class Ingredient {
     }
 }
 
+//region ****************** UseByDate Class ******************
 
-// ************** Functions ************** //
+/**
+ * The UseByDate Class is takes a user-entered date, verifies it, formats it, splits
+ * it and rebuilds it in various standard/nonstandard formats.
+ * @description This means that thorough validation is inbuilt, and a user may enter many
+ * variations of a date.
+ * @property Year Year entered by the user, or a future year if only Day and Month were entered. <br/>
+ * @property Month Month entered by the user, or generated if only Year was entered. <br/>
+ * @property Day Day entered by the user, or generated if only Year was entered. <br/>
+ * @property ISODate Widely standardised date format. Required for use with HTML date input fields. <br/>
+ */
+class UseByDate {
+    /**
+     * @param arguedDate A 'dirty' date. Can be passed in the following formats: <br/>
+     * – yyyy/mm/dd <br/>
+     * – dd/mm/yyyy <br/>
+     * – dd/mm <br/>
+     * – d/m <br/>
+     * slashes can be replaced with dashes (-) or white space. <br/>
+     */
+    constructor(arguedDate) {
+        arguedDate = this.cleanDate(arguedDate)
+        let dayMonth = this.splitDate(arguedDate) // more efficient than calling splitDate twice
 
-function loadRecipes() {
+        this.Month = dayMonth[2];
+        this.Day = dayMonth[1]; // at this point, there will be dates, no matter what.
 
-    RecipeClasses.forEach((recipe) => {
-        if (recipe.matchMe(getIngredients(true))) {
+        // find year separately (in separate function, to test if it's already been passed), OR DO SO IN VALIDATE!
+        this.Year = this.validateYear(arguedDate);
 
-            let elem = makeElement(document.querySelector('#recipeDisplay'), ['display-div', 'inventory'], 'div')
-            makeElement(elem, 'inventory', 'p').innerText = recipe.recipeName;
+        this.dateError(this.validDateBounds()) // throw an error if there's a problem
+
+        this.ISOFormat = `${this.Year}-${this.Month}-${this.Day}`;
+        this.DMYFormat = `${this.Day}-${this.Month}-${this.Year}`;
+    }
+
+    /**
+     * Performs basic formatting on dates and checks for obvious flaws
+     * @param date Date for verification
+     * @returns {string} Partially verified/formatted date
+     */
+    cleanDate(date) {
+        let errorMessage = '';
+        let originalDate = date;
+
+        // validation tests:
+        date.trim()
+        if (valueEmpty(date)) {errorMessage +=  `A paired date is empty. Check for newlines in the bulk-input fields.\n`}
+        if (/[^\d\s\/-]/g.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`} // anything other than whitespace, digits, slashes or dashed? invalid date.
+        date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
+        date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
+
+        if (date.match(/(^\d{4}$)/)) {date = '01-06'} // No dates? get some.
+        if (!/(\d\d)-(\d\d)/.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`}
+
+        this.dateError(errorMessage);
+
+        // dates should be semi-formatted up to this point
+        return date;
+    }
+    splitDate(date) {
+        let yearExists = /\d{4}/.test(date);
+        if (!yearExists) {
+            return date.match(/(\d\d)-(\d\d)/);
         }
-    })
+
+        let ISOFormat = /^\d{4}/.test(date); // what side is the year on? left or right?
+        if (ISOFormat) { // yyyy/mm/dd
+            let matchArr = date.match(/(\d\d)-(\d\d$)/);
+            matchArr.shift(); // remove [0]
+            matchArr.reverse().unshift(1); // swap, then add a placeholder to position [0]
+            return matchArr;
+        }else { // dd/mm/yyyy
+            return date.match(/(^\d\d)-(\d\d)/);
+        }
+    }
+    /**
+     * Checks that year is in the future, and returns the next valid year if the one entered is in the past.
+     * @param date four-digit year
+     * @returns {string} yyyy
+     */
+    validateYear(date) {
+        let year;
+        try {year = date.match(/\d{4}/)[0]}
+        catch {year = new Date().getFullYear()} // no year passed? make one!
+
+        let currentMonth = new Date().getMonth() + 1 // +1 because getMonth() starts at month 0
+        let currentDay = new Date().getDate()
+        let nextYear = (new Date().getFullYear() + 1).toString()
+
+        if (this.Year < nextYear-1) { // argued year is in the past
+            alertUser(`A year you entered is in the past. Are you sure this is correct?`)
+        }
+
+        // make sure dates are only passed through this when entered (without a Year),
+        // as otherwise off ingredients will magically become fresh again...
+        if (this.Month > currentMonth) { // the argued Month is in the future
+            return year;
+        }else if ((this.Month === currentMonth) && (this.Day >= currentDay)) { // the argued Month is current, and the Day is either current or in the future
+            return year;
+        }else if (this.Month < currentMonth) { // the argued Month is in the past
+            return nextYear;
+        }else if ((this.Month === currentMonth) && (this.Day < currentDay)) { // the argued Month is current, but the Day is in the past
+            return nextYear;
+        }else {
+            this.dateError(`There was an error with the year you entered: ${this.Year}`)
+        }
+    }
+    validDateBounds() { // Check that Date is within correct bounds for the given Month
+
+        if (this.Day < 1) return false; // lol
+
+        switch (true) {
+            case (parseInt(this.Month) > 0) && !(parseInt(this.Month) <= 12): // Month is out of bounds
+                return this.dateError('the Month is invalid');
+
+            case /04|06|09|11/.test(this.Month): // 31 Month
+                return this.Day <= 31 ? true : this.dateError('the days are over 31');
+
+            case /01/.test(this.Month): // feb
+                if ((this.Year % 4) !== 0) {
+                    if (this.Day === 28) {return this.dateError("don't you bloody well try a leap Year on me, it's 1am and i cant be bo")} // leap Year?
+                }
+                return this.Day <= 29 ? true : this.dateError('days are over 29');
+
+            default: // must be a 30 date
+                return this.Day <= 30 ? true : this.dateError('days are over 30');
+        }
+    }
+
+    /**
+     * Checks if a valid message has been passed, and throws the {@link userError} object with errMsg as the `message` property
+     * @param errMsg Error message to display to the user
+     */
+    dateError(errMsg) {
+        if (valueEmpty(errMsg) || typeof errMsg !== "string") {return}
+        userError.message = errMsg;
+        throw userError;
+    }
 }
 
 
-// ************** RECIPES ************** //
+//region ************** OBJECTS ************** //
 
+//Recipes
 const nachos = new Recipe('Nachos',
     ['corn chips', 'red kidney beans'],
     ['tomato passata|tomato paste']);
@@ -108,10 +237,7 @@ const broccoliCheeseBake = new Recipe('Broccoli Cheese Bake',
 RecipeClasses = [nachos, potatoSoup, carrotSoup, vegetableStirFry, mushroomCheeseStuffedPotatoes, broccoliCheeseBake];
 
 
-// ************** INGREDIENTS ************** //
-
-// curry pastes, parmesan
-
+// Ingredients
 const tofu = new Ingredient('tofu', 'protein', '');
 const parmesan = new Ingredient('parmesan', 'dairy', 'cheese', ['parmigiano reggiano', 'reggiano'])
 const coconutMilk = new Ingredient('coconut milk', 'misc', '');
@@ -155,3 +281,4 @@ IngredientClasses = [carrot, lettuce, spinach, broccoli, potato, onion, garlic, 
     springOnion, mushroom, milk, butter, cheese, yogurt, apple, tomato, cucumber,
     almond, peanut, parsley, basil, chives, ginger];
 
+//endregion

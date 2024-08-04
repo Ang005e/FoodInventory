@@ -6,6 +6,8 @@
 let _focusedElem;
 let _timeoutPromise;
 let _dummyDataTest = false;
+let userError = new Error();
+userError.cause = 'user-error';
 //endregion get fked globals
 
 
@@ -139,7 +141,7 @@ function eventCentre(event) {
         // once the above has been completed, create the new element
         (skipCreation === false) && (createInput(inputCount() + 1))
     } catch (e) {
-        errorPrinter(e)
+        errorCentre(e)
     }
 }
 //endregion
@@ -206,7 +208,7 @@ function setElemAttribute(elem, attribute='readonly', value='readonly') {
             elem.setAttribute(attribute, value);
         }
     }catch (e) {
-        errorPrinter(e);
+        errorCentre(e);
         console.log('event may not be linked with an item entry')
     }
 }
@@ -276,7 +278,7 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
         try {
             storageAction('clear', `txt-input${elemIdNum}`);
             document.querySelector(`#txt-input${elemIdNum}`).remove();
-        }catch (e) {errorPrinter(e)}
+        }catch (e) {errorCentre(e)}
 
     })
 
@@ -333,7 +335,7 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
             throw TypeError('Provided value is not of the correct format')
         }
     }catch (e) {
-        errorPrinter(e);
+        errorCentre(e);
         if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
         return true;
     }
@@ -345,40 +347,37 @@ function storeBulkInput(action, string = '', date) { // stores/retrives the bulk
     let list = string.split('\n')
     list = list.join(',')
 
-    switch (action) {
-        case 'store':
-            date ? storageAction('store', 'bulk-date', list) : storageAction('store', 'bulk-ingredient', list)
-            break;
-        case 'combine':
-            let pairs = new Map()
-            let lenIng = storageAction('get', 'bulk-ingredient').split(',').length
-            let lenDate = storageAction('get', 'bulk-date').split(',').length
-            if (lenIng !== lenDate) {
-                let inputType = lenIng > lenDate ? 'date' : 'ingredient'
-                alertUser(`You are missing ${Math.abs(lenIng-lenDate)} ${inputType} in bulk ${inputType} input`)
-                return;
-            }
-            for (let i = 0; i < lenIng; i++) { // set map and validate values
-
-                let ingredient = (storageAction('get', 'bulk-ingredient').split(',')[i])
-                let date = storageAction('get', 'bulk-date').split(',')[i]
-
-                if (valueEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
-
-                date = valiDate(date); // validate date value before it is stored
-                if (!date) {
-                    alertUser(date); return;
-                }
-
-                pairs.set(ingredient, date)
-            }
-
-            pairs.forEach((date, ingredient) => { // store each pair
-                storageAction('store', `txt-input${inputCount('stored', true)+1}`, ingredient);
-                storageAction('store', `txt-input${inputCount('stored', true)+1}`, date);
-            });
-            populatePage(); // repopulate the page
+    if (action === 'store') {
+        date ? storageAction('store', 'bulk-date', list) : storageAction('store', 'bulk-ingredient', list)
+        return;
     }
+    if (action !== 'combine') {return;}
+
+    let pairs = new Map()
+    let lenIng = storageAction('get', 'bulk-ingredient').split(',').length
+    let lenDate = storageAction('get', 'bulk-date').split(',').length
+    if (lenIng !== lenDate) {
+        let inputType = lenIng > lenDate ? 'date' : 'ingredient'
+        alertUser(`You are missing ${Math.abs(lenIng-lenDate)} ${inputType} in bulk ${inputType} input`)
+        return;
+    }
+    for (let i = 0; i < lenIng; i++) { // set map and validate values
+
+        let ingredient = (storageAction('get', 'bulk-ingredient').split(',')[i])
+        let date = storageAction('get', 'bulk-date').split(',')[i]
+
+        if (valueEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
+
+        let useByDate = new UseByDate(date); // create, validate and format a new UseByDate object
+        // before storing the date.
+        pairs.set(ingredient, useByDate.ISOFormat)
+
+    }
+    pairs.forEach((date, ingredient) => { // store each pair
+        storageAction('store', `txt-input${inputCount('stored', true)+1}`, ingredient);
+        storageAction('store', `txt-input${inputCount('stored', true)+1}`, date);
+    });
+    populatePage(); // repopulate the page
 }
 
 function inputCount(returnIndex = 'current', refreshStoredIndex = true) {
@@ -462,7 +461,7 @@ function getIdIndex(identifier) { //
         console.log(identifier)
         return parseInt(identifier);
     }catch (e) {
-        errorPrinter(e);
+        errorCentre(e);
     }
 }
 
@@ -493,6 +492,13 @@ function isEven(value) {
 function pageName(page) {
     return document.location.pathname.includes(`${page}.html`);
 }
+function errorCentre(errorObj) {
+    if (errorObj.cause === 'user-error') {
+        alertUser(errorObj.message)
+    }else{
+        errorPrinter(errorObj.message);
+    }
+}
 function errorPrinter(e) { // lazy programming, aka modularity
     let startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
     // (must be the function that the error happened in)
@@ -500,32 +506,5 @@ function errorPrinter(e) { // lazy programming, aka modularity
     console.warn('Error in function ' + functionName.trim() + '()');
 }
 
-/**
- * Convert `date` to the standard ISO date format (yyyy-mm-dd) so it can be passed back to a HTML date input.
- * @param date A date in one of the following formats: `dd/mm/yyyy`, `dd/mm`, `d/m` or `yyyy`. Can be seperated by whitespace ' ', dash '-', or slash '/'
- * @returns {[string, string, string]|string|boolean} yyyy-mm-dd, or false if there's an issue
- */
-function valiDate(date) {
-    try {
-        // validation tests:
-        date.trim()
-        if (valueEmpty(date)) {return `A paired date is empty. Check for newlines in the bulk-input fields.`}
-        if (/[^\d\s\/-]/g.test(date)) {return `A date contains invalid characters: ${date}`} // anything other than whitespace, digits, slashes or dashed? invalid date.
-        date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
-        date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
-        date = date.match(/^\d{4}$/) ? `${date}-06-06` : date; // If only the year was passed, just do the lazy programmer thing
-        let validationResult = validateMonth(date)
-        debugger
-        if (validationResult !== true) {return `There's an issue with your date: ${date} (${validationResult})`}
 
-        // dates should be valid and seperated by '-' up to this point
-        // format correction:
-
-        return date.match(/-\d{4}\b/g)[0] !== null ? manipulateDate(date) : date // year is in the expected position & format? convert the date to ISO format
-    }
-    catch {
-        date = manipulateDate(date, false, new Date().getFullYear()) // the year is null/doesn't exist
-        return valiDateYear(date) // hahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahahaha im going insane
-    }
-}
 //endregion
