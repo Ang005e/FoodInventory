@@ -8,6 +8,7 @@
     border-collapse: collapse;
     overflow: hidden;
     scrollbar-width: thin;
+    scrollbar-color: black rgba(205, 205, 206, 0.9);
     color: #333333;
     border-color: darkgray;
 }
@@ -17,19 +18,14 @@ main {
     height: 80vh;
     background-color: rgba(205, 205, 206, 0.9);
 }
-main.inventory {
-    background-color: #F5F5F5;
-}
 header, footer {
     border: 3px solid;
     height: 10vh;
     background-color: rgba(128, 128, 128, 0.85);
 }
-h1 {
+p, label, h1 {
+    font-family: "PT Sans", sans-serif;
     text-align: center;
-}
-p, label {
-    font-family: sans-serif;
 }
 button {
     color: #333333;
@@ -96,6 +92,7 @@ fieldset {
     width: 48.2vw;
     height: 20vh;
     overflow: scroll;
+    resize: none;
 }
 #field-bulk label:first-of-type, #txt-bulk-ingredient {
     float: left;
@@ -143,9 +140,9 @@ button:first-child {
 
 main.inventory {
     display: grid;
-    padding-top: 5vh;
     padding-left: 5vw;
     grid-template-rows: auto auto auto;
+    background-color: rgba(205, 205, 206, 0.9);
     grid-template-columns: repeat(2, calc((102% - 5vw) / 2));
     grid-auto-flow: row;
     overflow-y: auto;
@@ -165,14 +162,18 @@ h1 {
 #scrollContainer { /*oops*/
     grid-area: 1 / 1 / span 1 / span 2;
     height: max-content;
+    padding-top: 7vw;
+    padding-right: 2vw;
+    padding-left: 2vw;
+    background-color: #F5F5F5;
 }
-#ingredientDisplay {
+#ingredient-display {
     position: relative;
     float: left;
     width: calc(50%);
     border-top: 1px solid black;
 }
-#dateDisplay {
+#date-display {
     position: relative;
     width: calc(50%);
     border-top: 1px solid black;
@@ -184,19 +185,27 @@ div.inventory {
     padding-top: 16px;
     border-bottom: 1px solid black;
 }
-#ingredientDisplay div {
+#ingredient-display div {
     border-left: 1px solid black;
     min-width: max-content;
 }
-#dateDisplay div {
+#date-display div {
     border-inline: 1px solid black;
 }
 
+/* table-esque styling */
+
+
 /* Recipes */
-#recipeDisplay {
+#recipe-display {
     grid-area: auto / span 1 / span 2;
-    height: fit-content;
+    height: 100%;
     margin-top: 8vh;
+    margin-bottom: 8vh;
+    padding-bottom: 3vh;
+    padding-top: 2vh;
+    padding-inline: 12px;
+    background-color: rgba(205, 205, 206, 0.5);
 }
 
 
@@ -215,7 +224,7 @@ div.inventory {
     h1 {
         font-size: 3rem;
     }
-    #recipeDisplay {
+    #recipe-display {
         grid-area: 1 / 3;
         overflow-y: auto;
         margin-top: 0;
@@ -258,7 +267,7 @@ div.inventory {
     h1 {
         font-size: 3.2rem;
     }
-    #recipeDisplay {
+    #recipe-display {
         grid-area: 1 / 5;
     }
 }

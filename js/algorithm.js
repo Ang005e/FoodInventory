@@ -16,13 +16,13 @@ function pageLoad() {
         let prevI = 0;
 
         getIngredients(true).forEach((ingredient) => {
-            let parentElem = document.querySelector('#ingredientDisplay');
+            let parentElem = document.querySelector('#ingredient-display');
             let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = ingredient.toString();
         })
         getIngredients(false, true).forEach((value) => {
             let date = new UseByDate(value).DMYFormat; //convert to DMY
-            let parentElem = document.querySelector('#dateDisplay');
+            let parentElem = document.querySelector('#date-display');
             let elem = makeElement(parentElem, ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = date;
         })
@@ -36,7 +36,7 @@ function loadRecipes() {
     RecipeClasses.forEach((recipe) => {
         if (recipe.matchMe(getIngredients(true))) {
 
-            let elem = makeElement(document.querySelector('#recipeDisplay'), ['display-div', 'inventory'], 'div')
+            let elem = makeElement(document.querySelector('#recipe-display'), ['display-div', 'inventory'], 'div')
             makeElement(elem, 'inventory', 'p').innerText = recipe.recipeName;
         }
     })
