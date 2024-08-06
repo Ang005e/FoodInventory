@@ -1,5 +1,7 @@
 :root {
     --fit: fit-content;
+    --input-width: 130px;
+    --input-hight: 30px;
 }
 * {
     box-sizing: border-box;
@@ -25,6 +27,8 @@ header, footer {
 }
 p, label, h1 {
     font-family: "PT Sans", sans-serif;
+}
+h1 {
     text-align: center;
 }
 button {
@@ -75,32 +79,56 @@ fieldset {
 }
 .field-input {
     display: grid;
+    position: relative;
     grid-template-columns: auto repeat(5, 1fr);
-    grid-template-rows: repeat(8, 0.4rem);
+    grid-template-rows: repeat(8, 1.2rem);
     grid-auto-flow: column;
     grid-gap: 1rem;
 }
-.field-input > *  {
-    max-width: 20vw;
-    min-width: 125px;
+.label-container {
+    position: relative;
+    grid-area: span 1 /span 8;
+}
+.field-input label  {
+    width: 130px;
     height: 20px;
+    border: 1px solid #333333;
+    border-radius: 25px;
+}
+.single-input {
+    width: var(--input-width);
+    height: var(--input-hight);
+    border-radius: 15px;
+    text-align: center;
+}
+.single-input:nth-of-type(2n + 1) {
+    background-color: darkgray;
+    border-color: white;
 }
 
 .txt-bulk {
     display: block;
     margin-block-start: 20px;: ;
-    width: 48.2vw;
+    width: 47.5vw;
     height: 20vh;
+    margin-top: 2.5vh;
     overflow: scroll;
     resize: none;
 }
+#field-bulk {
+    display: grid;
+    grid-template: [row1] 100% / [col1] 50% [col2] 50%;
+}
+#field-bulk label {
+    margin-top: 0.5vh;
+}
 #field-bulk label:first-of-type, #txt-bulk-ingredient {
-    float: left;
-    clear: left;
+    grid-area: row1 / col1;
+    margin-left: 1vw;
 }
 #field-bulk label:last-of-type, #txt-bulk-date {
-    position: relative;
-    left: 1.8vw;
+    grid-area: row1 / col2;
+    margin-left: 0.5vw;
 }
 
 button {
@@ -194,7 +222,17 @@ div.inventory {
 }
 
 /* table-esque styling */
+aside > div:first-of-type > p {
+    font-size: 1.8rem;
+    margin-bottom: 3px;
+}
 
+.display-div:nth-of-type(2n+1) {
+    background-color: rgba(205, 205, 206, 0.5);
+}
+aside > div:first-of-type {
+    background-color: rgba(169, 169, 169, 0.84) !important;
+}
 
 /* Recipes */
 #recipe-display {
@@ -215,7 +253,7 @@ div.inventory {
 @media only screen and (min-width: 850px) {
     main.inventory{
         grid-template-rows: auto;
-        grid-template-columns: repeat(2, calc((50% - 2.5vw) / 2)) calc(50% - 2.5vw);
+        grid-template-columns: repeat(2, calc((100% - 5vw) / 2));
         overflow-y: hidden;
     }
     p.inventory{
@@ -225,7 +263,6 @@ div.inventory {
         font-size: 3rem;
     }
     #recipe-display {
-        grid-area: 1 / 3;
         overflow-y: auto;
         margin-top: 0;
     }

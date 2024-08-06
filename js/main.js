@@ -52,6 +52,10 @@ function focusListener(elem) {
     }
     document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
 }
+
+/*window.addEventListener('resize', () => {
+    handleGrid();
+})*/
 //endregion
 
 
@@ -203,9 +207,9 @@ function alertUser(message) {
     _timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
 }
 
-function setElemAttribute(elem, attribute='readonly', value='readonly') {
+function setElemAttribute(elem, attribute='readonly', value='readonly', check = true) {
     try {
-        if (!elem.hasAttribute(attribute)) {
+        if (!elem.hasAttribute(attribute) && check) {
             elem.setAttribute(attribute, value);
         }
     }catch (e) {
@@ -285,6 +289,26 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
 
     shuffleIdIndex();
 }
+
+/*
+//ToDo:
+function handleGrid() {
+    let mainSize = [readElem('main', 'width'),
+        readElem('main', 'height')]
+
+    document.querySelector('.field-input').style.gridTemplateRows = `repeat(${(parseInt(mainSize[0]) / 130).toString()}, 1fr) !important`  // divided by value of --input-width custom css property
+    document.querySelector('.field-input :last-of-type').style.gridTemplateColumns = `repeat(${(parseInt(mainSize[1]) / 30).toString()}, 1.2rem) !important` // divided by value of --input-height custom css property
+
+    /!* css:
+    #field-input
+    grid-template-columns: auto repeat(5, 1fr);
+    grid-template-rows: repeat(8, 1.2rem);
+    grid-auto-flow: column;
+    *!/
+}
+*/
+
+
 //endregion
 
 
@@ -483,6 +507,12 @@ function valueEmpty(value) {
         default:
             return false;
     }
+}
+function readElem(handle, requestedProperty = '') {
+    let elem;
+    elem = document.querySelectorAll(handle);
+    let elemProperties = getComputedStyle(elem[0]);
+    return elemProperties[requestedProperty] // return property value.
 }
 function isEven(value) {
     parseInt(value);
