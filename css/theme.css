@@ -31,14 +31,7 @@ p, label, h1 {
 h1 {
     text-align: center;
 }
-button {
-    color: #333333;
-    border-color: white;
-    background-color: #FFD700;
-    margin-block: 2px;
-    margin-top: 10px;
-    padding-block: 4px;: ;
-}
+
 fieldset {
     background-color: #F5F5F5;
 }
@@ -80,18 +73,26 @@ fieldset {
 .field-input {
     display: grid;
     position: relative;
+    margin-top: 10px;
+    min-height: 300px;
     grid-template-columns: auto repeat(5, 1fr);
     grid-template-rows: repeat(8, 1.2rem);
     grid-auto-flow: column;
     grid-gap: 1rem;
 }
+#field-date {
+    margin-top: 30px
+}
 .label-container {
+    height: fit-content;
     position: relative;
     grid-area: span 1 /span 8;
 }
 .field-input label  {
-    width: 130px;
-    height: 20px;
+    text-align: center;
+    display: inline-block;
+    width: 100%;
+    height: fit-content;
     border: 1px solid #333333;
     border-radius: 25px;
 }
@@ -101,9 +102,21 @@ fieldset {
     border-radius: 15px;
     text-align: center;
 }
+input[type="text"], input[type="date"] {
+    font-family: monospace;
+}
 .single-input:nth-of-type(2n + 1) {
     background-color: darkgray;
     border-color: white;
+}
+
+#field-bulk {
+    display: grid;
+    height: 90%;
+    grid-template: [row1] 100% / [col1] 50% [col2] 50%;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
 }
 
 .txt-bulk {
@@ -111,16 +124,18 @@ fieldset {
     margin-block-start: 20px;: ;
     width: 47.5vw;
     height: 20vh;
-    margin-top: 2.5vh;
+    min-height: 200px;
+    margin-top: 40px;
     overflow: scroll;
     resize: none;
 }
-#field-bulk {
-    display: grid;
-    grid-template: [row1] 100% / [col1] 50% [col2] 50%;
-}
+
 #field-bulk label {
-    margin-top: 0.5vh;
+    margin-top: 10px;
+    text-align: center;
+    border: 1px solid #333333;
+    height: fit-content;
+    width: 47.5vw;
 }
 #field-bulk label:first-of-type, #txt-bulk-ingredient {
     grid-area: row1 / col1;
@@ -132,10 +147,17 @@ fieldset {
 }
 
 button {
+    color: #333333;
+    border-color: white;
+    background-color: #FFD700;
+    margin-block: 2px;
+    margin-top: 10px;
+    padding-block: 4px;
     cursor: pointer;
     margin-left: 0.1vw;
+    font-size: 0.9rem;
+    margin-inline: 3px
 }
-
 button:first-child {
     margin-left: 1vw;
 }
@@ -148,13 +170,11 @@ button:first-child {
 }
 #field-buttons {
     display: grid;
+    position: relative;
     grid-template-rows: 1fr;
     grid-template-columns: repeat(4, 1fr);
     width: 100vw;
     padding-right: 0.5vw;
-}
-.btn-ingredient {
-    margin-inline: 5px;
 }
 #btn-remove-all {
     margin-left: 1vw;
@@ -168,10 +188,10 @@ button:first-child {
 
 main.inventory {
     display: grid;
-    padding-left: 5vw;
+    padding-left: 1.5vw;
     grid-template-rows: auto auto auto;
     background-color: rgba(205, 205, 206, 0.9);
-    grid-template-columns: repeat(2, calc((102% - 5vw) / 2));
+    grid-template-columns: repeat(2, calc((102% - 1.5vw) / 2));
     grid-auto-flow: row;
     overflow-y: auto;
 }
@@ -187,24 +207,37 @@ h1 {
 
 /* Ingredients and dates */
 
-#scrollContainer { /*oops*/
+#scroll-container {
     grid-area: 1 / 1 / span 1 / span 2;
-    height: max-content;
-    padding-top: 7vw;
-    padding-right: 2vw;
-    padding-left: 2vw;
+    display: grid;
+    grid-template-rows: fit-content(100%) fit-content(100%);
+    grid-template-columns: repeat(8, calc(100% / 8));
+    height: fit-content;
+    padding-block: 30px;
+    padding-inline: 20px;
     background-color: #F5F5F5;
 }
 #ingredient-display {
     position: relative;
-    float: left;
-    width: calc(50%);
     border-top: 1px solid black;
+    border-left: 1px solid black;
+    grid-area: 1 / 1 / span 1 / span 4;
 }
 #date-display {
     position: relative;
-    width: calc(50%);
     border-top: 1px solid black;
+    border-inline: 1px solid black;
+    grid-area: 1 / 5 / span 1 / span 4;
+}
+/* Recipes */
+#recipe-display {
+    grid-area: 2 / 1 / span 1 / span 8;
+    padding-top: 2vh;
+    padding-bottom: 8vh;
+    padding-inline: 12px;
+    background-color: rgba(205, 205, 206, 0.5);
+    font-size: 1.5rem;
+    text-align: center;
 }
 div.inventory {
     position: relative;
@@ -212,13 +245,6 @@ div.inventory {
     height: fit-content;
     padding-top: 16px;
     border-bottom: 1px solid black;
-}
-#ingredient-display div {
-    border-left: 1px solid black;
-    min-width: max-content;
-}
-#date-display div {
-    border-inline: 1px solid black;
 }
 
 /* table-esque styling */
@@ -234,27 +260,20 @@ aside > div:first-of-type {
     background-color: rgba(169, 169, 169, 0.84) !important;
 }
 
-/* Recipes */
-#recipe-display {
-    grid-area: auto / span 1 / span 2;
-    height: 100%;
-    margin-top: 8vh;
-    margin-bottom: 8vh;
-    padding-bottom: 3vh;
-    padding-top: 2vh;
-    padding-inline: 12px;
-    background-color: rgba(205, 205, 206, 0.5);
-}
+
 
 
 /******************** MEDIA QUERIES ********************/
-/************* design for mobile first! ;) *************/
+/************* design for mobile first :) *************/
 
 @media only screen and (min-width: 850px) {
     main.inventory{
+        padding-left: 3vw;
         grid-template-rows: auto;
-        grid-template-columns: repeat(2, calc((100% - 5vw) / 2));
-        overflow-y: hidden;
+        grid-template-columns: repeat(2, calc((100% - 3vw) / 2));
+    }
+    #scroll-container {
+        padding-inline: 40px;
     }
     p.inventory{
         font-size: 1.3rem;
@@ -266,10 +285,6 @@ aside > div:first-of-type {
         overflow-y: auto;
         margin-top: 0;
     }
-    #scrollContainer {
-        height: 100%;
-        overflow-y: auto;
-    }
 }
 
 @media only screen and (min-width: 1200px) {
@@ -279,6 +294,12 @@ aside > div:first-of-type {
         grid-template-columns: repeat(2, 1fr);
         overflow-x: auto;
         grid-auto-flow: row;
+    }
+    button {
+        font-size: 1.1rem;
+    }
+    .field-input {
+        margin-top: 10px !important;
     }
     fieldset {
         width: 48.5vw;
@@ -295,8 +316,9 @@ aside > div:first-of-type {
 
 @media only screen and (min-width: 1600px) {
     main.inventory{
+        padding-left: 5vw;
         grid-template-rows: auto;
-        grid-template-columns: repeat(4, calc((50% - 2.5vw) / 4))  calc(50% - 2.5vw);
+        grid-template-columns: repeat(8, calc((100% - 5vw) / 8));
     }
     p.inventory{
         font-size: 1.2rem;
@@ -304,7 +326,17 @@ aside > div:first-of-type {
     h1 {
         font-size: 3.2rem;
     }
-    #recipe-display {
-        grid-area: 1 / 5;
+    #scroll-container {
+        grid-area: 1 / 1 / span 2 / span 8;
     }
+    #ingredient-display {
+        grid-area: 1 / 1 / span 2 / span 3;
+    }
+    #date-display {
+        grid-area: 1 / 4 / span 2 / span 3;
+    }
+    #recipe-display {
+        grid-area: 1 / 7 / span 2 / span 2;
+    }
+
 }

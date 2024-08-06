@@ -89,13 +89,11 @@ class UseByDate {
      */
     constructor(arguedDate) {
         arguedDate = this.cleanDate(arguedDate)
-        let dayMonth = this.splitDate(arguedDate) // more efficient than calling splitDate twice
+        let cleanedDate = this.splitDate(arguedDate) // more efficient than calling splitDate twice
 
-        this.Month = dayMonth[2];
-        this.Day = dayMonth[1]; // at this point, there will be dates, no matter what.
-
-        // find year separately (in separate function, to test if it's already been passed), OR DO SO IN VALIDATE!
-        this.Year = this.validateYear(arguedDate);
+        this.Month = cleanedDate[1];
+        this.Day = cleanedDate[2];
+        this.Year = this.validateYear(cleanedDate[0]) // at this point, there will be dates, no matter what.
 
         this.dateError(this.validDateBounds()) // throw an error if there's a problem
 
@@ -119,7 +117,7 @@ class UseByDate {
         date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
         date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
 
-        if (date.match(/(^\d{4}$)/)) {date = '01-06'} // No dates? get some.
+        if(date.match(/(^\d{4}$)/)) {date = `01-06-${date}`} // No dates? get some.
         if (!/(\d\d)-(\d\d)/.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`}
 
         this.dateError(errorMessage);
@@ -128,30 +126,29 @@ class UseByDate {
         return date;
     }
     splitDate(date) {
-        let yearExists = /\d{4}/.test(date);
-        if (!yearExists) {
-            return date.match(/(\d\d)-(\d\d)/);
+        let year;
+        try {year = date.match(/\d{4}/)[0]} catch {year = null}
+        if (valueEmpty(year)) {
+            date = date.match(/(\d\d)-(\d\d)/);
+            return [year, date[2], date[1]];
         }
-
         let ISOFormat = /^\d{4}/.test(date); // what side is the year on? left or right?
-        if (ISOFormat) { // yyyy/mm/dd
-            let matchArr = date.match(/(\d\d)-(\d\d$)/);
-            matchArr.shift(); // remove [0]
-            matchArr.reverse().unshift(1); // swap, then add a placeholder to position [0]
-            return matchArr;
-        }else { // dd/mm/yyyy
-            return date.match(/(^\d\d)-(\d\d)/);
+        if (ISOFormat) { // the date is: yyyy/mm/dd
+            date = date.match(/(\d\d)-(\d\d$)/);
+            return [year, date[1], date[2]];
+        }else { // the date is: dd/mm/yyyy
+            date = date.match(/(^\d\d)-(\d\d)/);
+            return [year, date[2], date[1]];
         }
     }
     /**
      * Checks that year is in the future, and returns the next valid year if the one entered is in the past.
-     * @param date four-digit year
+     * @param year four-digit year
      * @returns {string} yyyy
      */
-    validateYear(date) {
-        let year;
-        try {year = date.match(/\d{4}/)[0]}
-        catch {year = new Date().getFullYear()} // no year passed? make one!
+    validateYear(year) {
+        year = valueEmpty(year) ? new Date().getFullYear() : year // no year passed? make one!
+        year = parseInt(year);
 
         let currentMonth = new Date().getMonth() + 1 // +1 because getMonth() starts at month 0
         let currentDay = new Date().getDate()
@@ -166,13 +163,15 @@ class UseByDate {
 
         // make sure dates are only passed through this when entered (without a Year),
         // as otherwise off ingredients will magically become fresh again...
-        if (this.Month > currentMonth) { // the argued Month is in the future
+        let arguedMonth = parseInt(this.Month);
+        let arguedDay = parseInt(this.Day);
+        if (arguedMonth > currentMonth) { // the argued Month is in the future
             return year;
-        }else if ((this.Month === currentMonth) && (this.Day >= currentDay)) { // the argued Month is current, and the Day is either current or in the future
+        }else if ((arguedMonth === currentMonth) && (arguedDay >= currentDay)) { // the argued Month is current, and the Day is either current or in the future
             return year;
-        }else if (this.Month < currentMonth) { // the argued Month is in the past
+        }else if (arguedMonth < currentMonth) { // the argued Month is in the past
             return currentYear + 1;
-        }else if ((this.Month === currentMonth) && (this.Day < currentDay)) { // the argued Month is current, but the Day is in the past
+        }else if ((arguedMonth === currentMonth) && (arguedDay < currentDay)) { // the argued Month is current, but the Day is in the past
             return currentYear + 1;
         }else {
             this.dateError(`There was an error with the year you entered: ${year}`)
