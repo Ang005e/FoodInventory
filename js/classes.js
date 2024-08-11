@@ -95,7 +95,7 @@ class UseByDate {
         this.Day = cleanedDate[2];
         this.Year = this.validateYear(cleanedDate[0]) // at this point, there will be dates, no matter what.
 
-        this.dateError(this.validDateBounds()) // throw an error if there's a problem
+        this.validDateBounds() // throw an error if there's a problem
 
         this.ISOFormat = `${this.Year}-${this.Month}-${this.Day}`;
         this.DMYFormat = `${this.Day}-${this.Month}-${this.Year}`;
@@ -120,7 +120,7 @@ class UseByDate {
         if(date.match(/(^\d{4}$)/)) {date = `01-06-${date}`} // No dates? get some.
         if (!/(\d\d)-(\d\d)/.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`}
 
-        this.dateError(errorMessage);
+        if (!valueEmpty(errorMessage)) {throw new DateInvalidError(errorMessage)}
 
         // dates should be semi-formatted up to this point
         return date;
@@ -174,7 +174,7 @@ class UseByDate {
         }else if ((arguedMonth === currentMonth) && (arguedDay < currentDay)) { // the argued Month is current, but the Day is in the past
             return currentYear + 1;
         }else {
-            this.dateError(`There was an error with the year you entered: ${year}`)
+            throw new DateInvalidError(`There was an error with the year you entered: ${year}`)
         }
     }
     validDateBounds() { // Check that Date is within correct bounds for the given Month
@@ -183,35 +183,37 @@ class UseByDate {
 
         switch (true) {
             case (parseInt(this.Month) > 0) && !(parseInt(this.Month) <= 12): // Month is out of bounds
-                return this.dateError('the Month is invalid');
+                throw new DateInvalidError('the Month is invalid');
 
             case /04|06|09|11/.test(this.Month): // 31 Month
-                return this.Day <= 31 ? true : this.dateError('the days are over 31');
+                if (this.Day >= 31) {throw new DateInvalidError('the days are over 31')}
+                break;
 
             case /01/.test(this.Month): // feb
                 if ((this.Year % 4) !== 0) {
-                    if (this.Day === 28) {return this.dateError("don't you bloody well try a leap Year on me, it's 1am and i cant be bo")} // leap Year?
+                    if (this.Day === 28) {throw new DateInvalidError("don't you bloody well try a leap Year on me, it's 1am and i cant be bo")} // leap Year?
                 }
-                return this.Day <= 29 ? true : this.dateError('days are over 29');
+                if (this.Day >= 29) {throw new DateInvalidError('days are over 29')}
+                break;
 
             default: // must be a 30 date
-                return this.Day <= 30 ? true : this.dateError('days are over 30');
+                if (this.Day >= 30) {throw new DateInvalidError('days are over 30')}
+                break;
         }
     }
 
     /**
-     * Checks if a valid message has been passed, and throws the {@link userError} object with errMsg as the `message` property
-     * @param errMsg Error message to display to the user
+     * Checks if a custom-made error message has been passed, and throws the {@link userError} object with errMsg as the `message` property
+     * @param errMsg CustomError message to display to the user
      */
-    dateError(errMsg) {
-        if (valueEmpty(errMsg) || typeof errMsg !== "string") {return}
-        userError.message = errMsg;
-        throw userError;
-    }
 }
 
 
 //region ************** OBJECTS ************** //
+
+let userError
+
+
 
 //Recipes
 const nachos = new Recipe('Nachos',

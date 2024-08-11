@@ -6,8 +6,6 @@
 let _focusedElem;
 let _timeoutPromise;
 let _dummyDataTest = false;
-let userError = new Error();
-userError.cause = 'user-error';
 //endregion get fked globals
 
 
@@ -52,19 +50,18 @@ function focusListener(elem) {
     }
     document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
 }
-
-/*window.addEventListener('resize', () => {
-    handleGrid();
-})*/
 //endregion
 
 
 //region ************ MAIN FUNCTION ************
 
 function eventCentre(event) {
-    // Centralises and manages events, and makes it MUCH easier to debug and understand.
+    // Centralises and manages events, and makes the code MUCH easier to debug and understand.
+
+    // *Two Weeks Later*
+    // To think, I wrote that. I actually, really, wrote that.
+
     try {
-        let issue;
         console.log(event.type);
         switch (event.type) {
             case 'DOMContentLoaded':
@@ -98,12 +95,11 @@ function eventCentre(event) {
                 event.preventDefault();
 
                 if (event.target.id === 'btn-add-input') {
-                    storeInputValue(event, `txt-input${inputCount('current')}`);
+                    storeInputValue(event, document.querySelector(`#txt-input${inputCount('current')}`));
                     return createInput(inputCount() + 1);
                 }
 
-                issue = storeInputValue(event, event.target);
-                if (issue) {return}
+                storeInputValue(event, event.target);
                 break;
 
             case 'focus':
@@ -122,10 +118,7 @@ function eventCentre(event) {
                     console.log('element identified as null value - no elements should be on screen.')
                     return;
                 }
-                issue = storeInputValue(event, elem);
-                if (issue) {
-                    return
-                }
+                storeInputValue(event, elem);
                 break;
             case 'btn-remove-input':
                 try {removeInputPair(_focusedElem);}
@@ -290,25 +283,6 @@ function removeInputPair(elem) { // removes selected input field. Also deletes t
     shuffleIdIndex();
 }
 
-/*
-//ToDo:
-function handleGrid() {
-    let mainSize = [readElem('main', 'width'),
-        readElem('main', 'height')]
-
-    document.querySelector('.field-input').style.gridTemplateRows = `repeat(${(parseInt(mainSize[0]) / 130).toString()}, 1fr) !important`  // divided by value of --input-width custom css property
-    document.querySelector('.field-input :last-of-type').style.gridTemplateColumns = `repeat(${(parseInt(mainSize[1]) / 30).toString()}, 1.2rem) !important` // divided by value of --input-height custom css property
-
-    /!* css:
-    #field-input
-    grid-template-columns: auto repeat(5, 1fr);
-    grid-template-rows: repeat(8, 1.2rem);
-    grid-auto-flow: column;
-    *!/
-}
-*/
-
-
 //endregion
 
 
@@ -335,35 +309,26 @@ function handleGrid() {
 
 function storeInputValue(event, elem) { // takes an event and an elem as arguments,
     // and prepares values for use with storageAction. Additionally, refreshes the id index system.
-    try {
-        // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
-        // Guard clauses:
-        if (inputCount('current') === 0) {return}
-        if (valueEmpty(event.target.value) && valueEmpty(elem.value) && (event.target.id !== 'btn-continue')) {
-            inputError();
-        }
 
-        if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
-            elem.forEach(elem => {
-                storageAction('store', elem.id, elem.value);
-                setElemAttribute(elem);
-            })
-        } else { // passed in as a single elem? do:
+    // console.log(`Attempting to store ${elem.type} value: ${elem.value}`);
+    // Guard clauses:
+    if (inputCount('current') === 0) {return}
+    if (valueEmpty(event.target.value) && valueEmpty(elem.value)) {
+
+        throw new Error('Provided value is not of the correct format')
+    }
+
+    if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
+        elem.forEach(elem => {
             storageAction('store', elem.id, elem.value);
             setElemAttribute(elem);
-        }
-        inputCount('none', true);
-
-        function inputError() {
-
-            // noinspection ExceptionCaughtLocallyJS
-            throw TypeError('Provided value is not of the correct format')
-        }
-    }catch (e) {
-        errorCentre(e);
-        if (e.name === "TypeError") {alertUser('Inappropriate value entered – are you typing the correct values?')}
-        return true;
+        })
+    } else { // passed in as a single elem? do:
+        storageAction('store', elem.id, elem.value);
+        setElemAttribute(elem);
     }
+    inputCount('none', true);
+
 }
 
 function storeBulkInput(action, string = '', date) { // stores/retrives the bulk-input and bulk-date items from localStorage.
@@ -496,7 +461,7 @@ function getIdIndex(identifier) { //
  */
 function valueEmpty(value) {
 
-    try {value.trim()} catch {return true}
+    value = typeof(value) === 'string' ? value.trim() : value;
     switch (value) {
         case undefined:
         case 'undefined':
@@ -508,12 +473,6 @@ function valueEmpty(value) {
             return false;
     }
 }
-function readElem(handle, requestedProperty = '') {
-    let elem;
-    elem = document.querySelectorAll(handle);
-    let elemProperties = getComputedStyle(elem[0]);
-    return elemProperties[requestedProperty] // return property value.
-}
 function isEven(value) {
     parseInt(value);
     return value % 2 === 0;
@@ -523,17 +482,20 @@ function pageName(page) {
     return document.location.pathname.includes(`${page}.html`);
 }
 function errorCentre(errorObj) {
-    if (errorObj.cause === 'user-error') {
-        alertUser(errorObj.message)
+
+    if (errorObj instanceof DateInvalidError) {
+        alertUser('Date Error: ' + errorObj.message)
     }else{
-        errorPrinter(errorObj.message);
+        errorPrinter(errorObj)
     }
 }
 function errorPrinter(e) { // lazy programming, aka modularity
-    let startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
+    let startPos;
+    startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
+
     // (must be the function that the error happened in)
     let functionName = startPos.substring(0, startPos.search(/\(/));
-    console.warn('Error in function ' + functionName.trim() + '()');
+    console.warn(`Error in function ${functionName.trim()}(): \n${e.message}`);
 }
 
 

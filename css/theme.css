@@ -1,7 +1,7 @@
 :root {
     --fit: fit-content;
     --input-width: 130px;
-    --input-hight: 30px;
+    --input-height: 30px;
 }
 * {
     box-sizing: border-box;
@@ -17,12 +17,12 @@
 main {
     scrollbar-gutter: stable;
     overflow-y: auto;
-    height: 80vh;
+    height: calc(100vh - 220px);
     background-color: rgba(205, 205, 206, 0.9);
 }
 header, footer {
     border: 3px solid;
-    height: 10vh;
+    height: 110px;
     background-color: rgba(128, 128, 128, 0.85);
 }
 p, label, h1 {
@@ -55,6 +55,7 @@ fieldset:first-of-type, fieldset:nth-of-type(2) {
 }
 
 form {
+    display: grid;
     grid-template-rows: repeat(4, 1fr);
     grid-template-columns: repeat(1, 1fr);
     overflow-x: auto;
@@ -75,10 +76,10 @@ fieldset {
     position: relative;
     margin-top: 10px;
     min-height: 300px;
-    grid-template-columns: auto repeat(5, 1fr);
+    grid-template-columns: repeat(4, var(--input-width));
     grid-template-rows: repeat(8, 1.2rem);
     grid-auto-flow: column;
-    grid-gap: 1rem;
+    grid-gap: 1rem 10px;
 }
 #field-date {
     margin-top: 30px
@@ -98,7 +99,7 @@ fieldset {
 }
 .single-input {
     width: var(--input-width);
-    height: var(--input-hight);
+    height: var(--input-height);
     border-radius: 15px;
     text-align: center;
 }
@@ -121,7 +122,6 @@ input[type="text"], input[type="date"] {
 
 .txt-bulk {
     display: block;
-    margin-block-start: 20px;: ;
     width: 47.5vw;
     height: 20vh;
     min-height: 200px;
@@ -165,7 +165,7 @@ button:first-child {
     width: 20vw;
     min-width: fit-content;
     height: 5vh;
-    min-height: fit-content;
+    min-height: 35px;
     transform: translate(calc(-50% + 50vw));
 }
 #field-buttons {
@@ -236,6 +236,7 @@ h1 {
     padding-bottom: 8vh;
     padding-inline: 12px;
     background-color: rgba(205, 205, 206, 0.5);
+    border: 5px ridge #FFD700;
     font-size: 1.5rem;
     text-align: center;
 }
@@ -266,7 +267,7 @@ aside > div:first-of-type {
 /******************** MEDIA QUERIES ********************/
 /************* design for mobile first :) *************/
 
-@media only screen and (min-width: 850px) {
+@media only screen and (min-width: 768px) {
     main.inventory{
         padding-left: 3vw;
         grid-template-rows: auto;
@@ -287,9 +288,17 @@ aside > div:first-of-type {
     }
 }
 
+@media only screen and (min-height: 1024px) {
+    main {
+        height: 80vh;
+    }
+    header, footer {
+        height: 10vh;
+    }
+}
+
 @media only screen and (min-width: 1200px) {
     form {
-        display: grid;
         grid-template-rows: repeat(2, 1fr);
         grid-template-columns: repeat(2, 1fr);
         overflow-x: auto;
@@ -311,6 +320,9 @@ aside > div:first-of-type {
         grid-column-start: -3;
         grid-column-end: -1;
         width: revert;
+    }
+    .label-container {
+        grid-area: span 1 / span 4;
     }
 }
 
