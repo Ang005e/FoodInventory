@@ -6,29 +6,45 @@
 let _focusedElem;
 let _timeoutPromise;
 let _dummyDataTest = false;
-//endregion get gone globals
+//endregion
+// get gone globals
 
 
 //region ************ EVENT LISTENERS ************
 
 // Add input fields on the click of a button:
 document.querySelectorAll('.btn-ingredient').forEach((elem)=> {
-    elem.addEventListener('click', (event) => eventCentre(event))
+    elem.addEventListener('click', (event) => saveInput(event))
 })
 
-// Populate index.html's elements with stored (previously entered) values
-if (pageName('index')) {
-    document.addEventListener('DOMContentLoaded', (event) => {
-        eventCentre(event)
-        document.querySelector('.btn-ingredient').focus()
-        document.addEventListener('keypress', (event) => eventCentre(event));
+
+// ************ index.html ************
+if (loadedPageName('index')) {
+
+    // On page load:
+    document.addEventListener('DOMContentLoaded', () => {
+
+        populatePage(); // populate the page with previous elements
+        document.querySelector('.btn-ingredient').focus() // focus the chosen button
+        document.addEventListener('keypress', (event) => {
+            if ((event.key !== 'Enter')) {
+                return // if the event is not a keypress on enter, return
+            }
+
+            keypressEvent(event);
+            // if the event is not associated with the bulk inputs, save the value:
+            (event.target.className !== 'txt-bulk') && (saveInput(event));
+        });
     })
+
+    // on click of the test data population button:
     document.querySelector('#btn-test-population').addEventListener('click', () => {
         _dummyDataTest = true
         let i = 0;
         let d = 0;
         let m = 0;
         storageAction('clear-all', '');
+
         IngredientClasses.forEach((ingredient)=> {
             d++;m++;
             (d > 29) && (d=1); (m > 12) && (m = 1);
@@ -42,7 +58,7 @@ if (pageName('index')) {
     })
 }
 
-// Adds listeners to allow users to manipulate selected input elements
+// Add a listener to mark focused input elements, allowing actions to be performed on them
 function focusListener(elem) {
     if (elem instanceof Element) {
         elem.addEventListener('focus', (event) => _focusedElem = event.target.id)
@@ -53,98 +69,91 @@ function focusListener(elem) {
 //endregion
 
 
-//region ************ MAIN FUNCTION ************
+//region ************ MAIN FUNCTIONS ************
 
+
+function keypressEvent(event) {
+
+    if (event.target.id === 'btn-add-input') {
+        storeInputValue(event, document.querySelector(`#txt-input${inputCount('current')}`));
+        return createInput(inputCount() + 1);
+    }
+
+    // Bulk input hotkey:
+    if (event.key === 'Enter' && event.shiftKey) { // shift + enter
+        event.preventDefault();
+
+        let date = (event.target === document.querySelector('#txt-bulk-date'));
+
+        if (event.target.id === 'txt-bulk-ingredient') {
+            storeBulkInput('store', event.target.value, date);
+            document.querySelector('#txt-bulk-date').focus();
+            return;
+        } else if (event.target.id === 'txt-bulk-date') {
+            storeBulkInput('store', event.target.value, date);
+            storeBulkInput('combine', event.target.value, date);
+            document.querySelector('#txt-bulk-ingredient').focus();
+            return;
+        }
+        document.querySelector('#txt-bulk-ingredient').focus();
+        return
+    }
+
+    // must be the enter key used on an ingredient/date field or btn-add-input, so:
+
+    if (event.target.className === 'txt-bulk') {return}
+
+    storeInputValue(event, event.target);
+}
 function saveInput(event) {
 
-}
+    let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
+    let skipCreation = false;
 
-
-function eventCentre(event) {
-    // Centralises and manages events, and makes the code MUCH easier to debug and understand.
-
-    // *Two Weeks Later*
-    // To think, I wrote that.
-
-    try {
-        console.log(event.type);
-        switch (event.type) {
-            case 'DOMContentLoaded':
-                populatePage();
+    switch (event.target.id) {
+        case 'btn-add-input':
+            if (valueEmpty(elem) || valueEmpty(elem.id)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
+                createInput(inputCount() + 1);
+                console.log('element identified as null value - no elements should be on screen.')
                 return;
-            case 'keypress':
-                if ((event.key !== 'Enter') && (event.key !== undefined)) {return}
+            }
+            storeInputValue(event, elem);
+            break;
 
-                // Bulk input hotkey:
-                if (event.key === 'Enter' && event.shiftKey) { // shift + enter
-                    event.preventDefault();
+        case 'btn-remove-input':
+            try {removeInputPair(_focusedElem);}
+            catch {removeInputPair(elem)}
+            return;
 
+        case 'btn-remove-all':
+            storageAction('clear_all', undefined);
+            inputCount('none', true);
+            removeAllInputs();
+            return;
 
-                    let date = (event.target === document.querySelector('#txt-bulk-date'));
-
-                    if (event.target.id === 'txt-bulk-ingredient') {
-                        storeBulkInput('store', event.target.value, date);
-                        document.querySelector('#txt-bulk-date').focus();
-                        return;
-                    } else if (event.target.id === 'txt-bulk-date') {
-                        storeBulkInput('store', event.target.value, date);
-                        storeBulkInput('combine', event.target.value, date);
-                        document.querySelector('#txt-bulk-ingredient').focus();
-                        return;
-                    }
-                    document.querySelector('#txt-bulk-ingredient').focus();
-                    return
-                    }
-
-                // must be the enter key used on an ingredient/date field or btn-add-input, so:
-                if (event.target.className === 'txt-bulk') {return}
-                event.preventDefault();
-
-                if (event.target.id === 'btn-add-input') {
-                    storeInputValue(event, document.querySelector(`#txt-input${inputCount('current')}`));
-                    return createInput(inputCount() + 1);
-                }
-
-                storeInputValue(event, event.target);
-                break;
-
-        }
-
-        let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
-        let skipCreation = false;
-
-        switch (event.target.id) {
-            case 'btn-add-input':
-
-                if (valueEmpty(elem) || valueEmpty(elem.id)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
-                    createInput(inputCount() + 1);
-                    console.log('element identified as null value - no elements should be on screen.')
+        case 'btn-continue':
+            let currentElems = inputCount('current', false);
+            if (!isEven(currentElems)) { // if an elem isn't paired...
+                let unpairedElem = document.querySelector(`#txt-input${currentElems}`);
+                if (valueEmpty(unpairedElem.value)) { // if it's empty, just remove it
+                    unpairedElem.remove();
+                } else { // otherwise, warn the user so they don't lose the value
+                    alertUser(`"${unpairedElem.value}" was entered without a date. please add one before continuing.`);
                     return;
                 }
+            } else {
                 storeInputValue(event, elem);
-                break;
-            case 'btn-remove-input':
-                try {removeInputPair(_focusedElem);}
-                catch {removeInputPair(elem)}
-                return;
-            case 'btn-remove-all':
-                storageAction('clear_all', undefined);
-                inputCount('none', true);
-                removeAllInputs();
-                return;
-            case 'btn-continue':
-                storeInputValue(event, elem)
+            }
 
-                skipCreation = true;
-                location.href = 'inventory.html';
-                return;
-        }
-        // once the above has been completed, create the new element
-        (skipCreation === false) && (createInput(inputCount() + 1))
-    } catch (e) {
-        errorCentre(e)
+            skipCreation = true;
+            location.href = 'inventory.html';
+            return;
     }
+    // once the above has been completed, create the new element
+    (skipCreation === false) && (createInput(inputCount() + 1))
+
 }
+
 //endregion
 
 
@@ -173,7 +182,7 @@ function setFieldsetInput(element, fieldsetNum, text = '', attributes=[], values
         case 2:
             fieldset = document.querySelector('#field-date');break;
         default:
-            console.error('WHAT THE FUCK WHY IS THIS HAPPENNINGKUHVIWEGYVIYTWEFVDTYFGQVWDUFGW');break //me daddy uwu;
+            throw new Error("a switch statement in setFieldsetInput() has reached its default case, which should not be possible")
     }
     let input = document.createElement(element);
     if (attributes.length > 0){
@@ -200,7 +209,9 @@ function alertUser(message) {
     alertDiv.innerHTML = message;
     alertDiv.classList.remove('hidden')
     clearTimeout(_timeoutPromise);
-    _timeoutPromise = setTimeout(() => {alertDiv.classList.add('hidden')}, 5000);
+    _timeoutPromise = setTimeout(() => {
+        alertDiv.classList.add('hidden')
+    }, 10000);
 }
 
 function setElemAttribute(elem, attribute='readonly', value='readonly', check = true) {
@@ -361,9 +372,13 @@ function storeBulkInput(action, string = '', date) { // stores/retrives the bulk
 
         if (valueEmpty(ingredient)) {alertUser(`Incorrect/empty ingredient value entered in bulk input: '${ingredient} '`); return;}
 
-        let useByDate = new UseByDate(date); // create, validate and format a new UseByDate object
-        // before storing the date.
-        pairs.set(ingredient, useByDate.ISOFormat)
+        try {
+            let useByDate = new UseByDate(date); // create, validate and format a new UseByDate object
+            // before storing the date.
+            pairs.set(ingredient, useByDate.ISOFormat)
+        } catch (e) {
+            errorCentre(e)
+        }
 
     }
     pairs.forEach((date, ingredient) => { // store each pair
@@ -481,7 +496,7 @@ function isEven(value) {
     return value % 2 === 0;
 } // remainder comparator helper function
 
-function pageName(page) {
+function loadedPageName(page) {
     return document.location.pathname.includes(`${page}.html`);
 }
 function errorCentre(errorObj) {

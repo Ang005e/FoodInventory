@@ -42,16 +42,21 @@ fieldset:first-of-type, fieldset:nth-of-type(2) {
 
 #alert-div {
     position: relative;
-    height: 4vh;
-    margin-top: 1vh;
-    padding-top: 0.5vh;
+    height: fit-content;
+    max-height: 5vh;
+    margin-inline: 0.5vw;
+    margin-top: 0.25vh;
+    padding-block: 0.3vh;
+    padding-inline: 1vw;
     border-radius: 2rem;
     border: 0.2rem solid black;
     background-color: red;
+    color: antiquewhite;
     font-family: Verdana, Tahoma, sans-serif;
     font-size: 1.2rem;
     text-align: center;
     transition: opacity 1s cubic-bezier(1, 0.9, 0.3, 1);
+    overflow-y: auto;
 }
 
 form {

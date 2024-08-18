@@ -113,12 +113,12 @@ class UseByDate {
         // validation tests:
         date.trim()
         if (valueEmpty(date)) {errorMessage +=  `A paired date is empty. Check for newlines in the bulk-input fields.\n`}
-        if (/[^\d\s\/-]/g.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`} // anything other than whitespace, digits, slashes or dashed? invalid date.
+        if (/[^\d\s\/-]/g.test(date)) {errorMessage += `Date contains characters that are not allowed: '${originalDate}' \n`} // anything other than whitespace, digits, slashes or dashed? invalid date.
         date = date.replaceAll(/(\/|\s)/g, '-') // Convert whitespaces or slashes to dashes
         date = date.replaceAll(/(\b|'-')(\d)(\b|'-')/g, '0$2') // Add zeros to single digits
 
         if(date.match(/(^\d{4}$)/)) {date = `01-06-${date}`} // No dates? get some.
-        if (!/(\d\d)-(\d\d)/.test(date)) {errorMessage += `'${originalDate}' is not a valid date.\n`}
+        if (!/(\d\d)-(\d\d)/.test(date)) {errorMessage += `Date is in the wrong format: '${originalDate}'\n`}
 
         if (!valueEmpty(errorMessage)) {throw new DateInvalidError(errorMessage)}
 
@@ -137,9 +137,12 @@ class UseByDate {
             date = date.match(/(\d\d)-(\d\d$)/);
             return [year, date[1], date[2]];
         }else { // the date is: dd/mm/yyyy
+            let oldDate = date
             date = date.match(/(^\d\d)-(\d\d)/);
+            if (date === null) {throw new DateInvalidError(`The entered date (${oldDate}) is invalid and cannot be read. Is it in an accepted format?`);}
             return [year, date[2], date[1]];
         }
+
     }
     /**
      * Checks that year is in the future, and returns the next valid year if the one entered is in the past.
@@ -152,7 +155,7 @@ class UseByDate {
 
         let currentMonth = new Date().getMonth() + 1 // +1 because getMonth() starts at month 0
         let currentDay = new Date().getDate()
-        let currentYear = (new Date().getFullYear()).toString()
+        let currentYear = (new Date().getFullYear())
 
         if (year < currentYear) { // argued year is in the past
             alertUser(`A year you entered is in the past. Are you sure this is correct?`)
@@ -165,14 +168,21 @@ class UseByDate {
         // as otherwise off ingredients will magically become fresh again...
         let arguedMonth = parseInt(this.Month);
         let arguedDay = parseInt(this.Day);
+        let nextYear = (currentYear + 1).toString()
         if (arguedMonth > currentMonth) { // the argued Month is in the future
             return year;
         }else if ((arguedMonth === currentMonth) && (arguedDay >= currentDay)) { // the argued Month is current, and the Day is either current or in the future
             return year;
         }else if (arguedMonth < currentMonth) { // the argued Month is in the past
-            return currentYear + 1;
+            let monthGap = currentMonth - arguedMonth
+            alertUser(`The date you entered (${this.Day}/${this.Month}/${year}) happened ${monthGap} month${monthGap===1?'':'s'} ago! 
+            It was changed to (${this.Day}/${this.Month}/${nextYear})`)
+            return nextYear;
         }else if ((arguedMonth === currentMonth) && (arguedDay < currentDay)) { // the argued Month is current, but the Day is in the past
-            return currentYear + 1;
+            let dayGap = currentDay - arguedDay
+            alertUser(`The date you entered (${this.Day}/${this.Month}/${year}) happened ${dayGap} day${dayGap===1?'':'s'} ago! 
+            It was changed to (${this.Day}/${this.Month}/${nextYear})`)
+            return nextYear;
         }else {
             throw new DateInvalidError(`There was an error with the year you entered: ${year}`)
         }
@@ -181,31 +191,38 @@ class UseByDate {
 
         if (this.Day < 1) return false; // lol
 
+        debugger
         switch (true) {
             case (parseInt(this.Month) > 0) && !(parseInt(this.Month) <= 12): // Month is out of bounds
-                throw new DateInvalidError('the Month is invalid');
+                throw new DateInvalidError('the month entered must be between 1 and 12');
 
             case /04|06|09|11/.test(this.Month): // 31 Month
-                if (this.Day >= 31) {throw new DateInvalidError('the days are over 31')}
+                if (this.Day >= 31) {throw new DateInvalidError(`the days in ${this.monthName(this.Month)} cannot be over 31 (${this.Day} was entered)`)}
                 break;
 
-            case /01/.test(this.Month): // feb
-                if ((this.Year % 4) !== 0) {
-                    if (this.Day === 28) {throw new DateInvalidError("don't you bloody well try a leap Year on me, it's 1am and i cant be bo")} // leap Year?
+            case /02/.test(this.Month): // feb
+                if ((this.Year % 4) === 0) {
+                    if (this.Day > 29) {throw new DateInvalidError("don't you try an invalid Leap Year on me, it's 1am and i cant be bo")} // leap Year?
                 }
-                if (this.Day >= 29) {throw new DateInvalidError('days are over 29')}
                 break;
 
             default: // must be a 30 date
-                if (this.Day >= 30) {throw new DateInvalidError('days are over 30')}
+                if (this.Day >= 30) {throw new DateInvalidError(`the days in ${this.monthName(this.Month)} cannot be over 30 (${this.Day} was entered)`)}
                 break;
         }
     }
 
     /**
-     * Checks if a custom-made error message has been passed, and throws the {@link userError} object with errMsg as the `message` property
-     * @param errMsg CustomError message to display to the user
+     *
+     * @param {int} num The month number.
+     * @returns {string} The name correlated with the month number.
      */
+    monthName(num){
+        if (num < 1 || num > 12) {throw new Error('The argued month number in monthName is beyond the bounds of accepted values (1 - 12)')}
+        let months = ['Month0', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
+            'September', 'October', 'November', 'December'];
+        return months[num]
+    }
 }
 
 
