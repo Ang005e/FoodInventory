@@ -1,6 +1,6 @@
 // ********** GLOBALS *********** //
 
-if (pageName('inventory')) {
+if (loadedPageName('inventory')) {
     document.addEventListener('DOMContentLoaded', function(){
         pageLoad();
         loadRecipes();
@@ -12,8 +12,6 @@ if (pageName('inventory')) {
 // Main code. Runs on page load/reload. Populates elems with ingredients and use-by-dates.
 function pageLoad() { 
     try {
-        let i = 0;
-        let prevI = 0;
 
         getIngredients(true).forEach((ingredient) => {
             let parentElem = document.querySelector('#ingredient-display');

@@ -6,6 +6,12 @@ by checking which ingredient needs using first!
 This website (currently) allows the user to input their foodstuffs and respective use-by-dates (if perishable), then view a list (ordered by entry) of ingredients and dates. 
 They can be added or removed at any time, and are stored in local storage on your computer.
 
+Inputs can be added either in bulk or as single inputs. if input as bulk inputs, the dates can be entered in many various formats, while remaining clean and not breaking the program.
+
+The dates are thoroughly checked, validated, formatted to ISO standard, and reformatted, utilising the class system I designed for this project.
+
+Thorough testing has been carried out, and the user is informed of any issues along the way.
+
 Many other plans are in the pipeline for this project, including 
 
 1. ~~Display recipe matches (and close matches).~~
