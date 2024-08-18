@@ -6,7 +6,7 @@
 let _focusedElem;
 let _timeoutPromise;
 let _dummyDataTest = false;
-//endregion get fked globals
+//endregion get gone globals
 
 
 //region ************ EVENT LISTENERS ************
@@ -45,21 +45,26 @@ if (pageName('index')) {
 // Adds listeners to allow users to manipulate selected input elements
 function focusListener(elem) {
     if (elem instanceof Element) {
-        elem.addEventListener('focus', (event) => eventCentre(event));
+        elem.addEventListener('focus', (event) => _focusedElem = event.target.id)
         return;
     }
-    document.querySelector('#'+elem).addEventListener('focus', (event) => eventCentre(event));
+    document.querySelector('#'+elem).addEventListener('focus', (event) => _focusedElem = event.target.id);
 }
 //endregion
 
 
 //region ************ MAIN FUNCTION ************
 
+function saveInput(event) {
+
+}
+
+
 function eventCentre(event) {
     // Centralises and manages events, and makes the code MUCH easier to debug and understand.
 
     // *Two Weeks Later*
-    // To think, I wrote that. I actually, really, wrote that.
+    // To think, I wrote that.
 
     try {
         console.log(event.type);
@@ -73,6 +78,7 @@ function eventCentre(event) {
                 // Bulk input hotkey:
                 if (event.key === 'Enter' && event.shiftKey) { // shift + enter
                     event.preventDefault();
+
 
                     let date = (event.target === document.querySelector('#txt-bulk-date'));
 
@@ -102,9 +108,6 @@ function eventCentre(event) {
                 storeInputValue(event, event.target);
                 break;
 
-            case 'focus':
-                _focusedElem = event.target.id;
-                return;
         }
 
         let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
