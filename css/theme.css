@@ -10,18 +10,19 @@
     border-collapse: collapse;
     overflow: hidden;
     scrollbar-width: thin;
-    scrollbar-color: black rgba(205, 205, 206, 0.9);
+    scrollbar-color: black #52505f;
     color: #333333;
     border-color: darkgray;
 }
 main {
-    scrollbar-gutter: stable;
+    scrollbar-gutter: auto;
     overflow-y: auto;
+    overflow-x: auto;
     height: calc(100vh - 220px);
     background-color: rgba(205, 205, 206, 0.9);
 }
 header, footer {
-    border: 3px solid;
+    border: 4px darkcyan ridge;
     height: 110px;
     background-color: rgba(128, 128, 128, 0.85);
 }
@@ -63,8 +64,8 @@ form {
     display: grid;
     grid-template-rows: repeat(4, 1fr);
     grid-template-columns: repeat(1, 1fr);
-    overflow-x: auto;
     grid-auto-flow: column;
+    width: fit-content;
 }
 fieldset {
     width: fit-content(100%);
@@ -131,7 +132,7 @@ input[type="text"], input[type="date"] {
     height: 20vh;
     min-height: 200px;
     margin-top: 40px;
-    overflow: scroll;
+    overflow: auto;
     resize: none;
 }
 
@@ -189,7 +190,9 @@ button:first-child {
     opacity: 0;
 }
 
+/********************************************************/
 /******************** INVENTORY PAGE ********************/
+/********************************************************/
 
 main.inventory {
     display: grid;
@@ -268,9 +271,12 @@ aside > div:first-of-type {
 
 
 
-
 /******************** MEDIA QUERIES ********************/
-/************* design for mobile first :) *************/
+/************* designed foremost for mobile *************/
+
+@media only screen and (min-width: 635px) {
+
+}
 
 @media only screen and (min-width: 768px) {
     main.inventory{

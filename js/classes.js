@@ -191,7 +191,6 @@ class UseByDate {
 
         if (this.Day < 1) return false; // lol
 
-        debugger
         switch (true) {
             case (parseInt(this.Month) > 0) && !(parseInt(this.Month) <= 12): // Month is out of bounds
                 throw new DateInvalidError('the month entered must be between 1 and 12');
