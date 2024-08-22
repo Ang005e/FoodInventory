@@ -4,7 +4,7 @@ class UserError extends Error {
     constructor(message: string) {
         super(message);
         this.name = new.target.name;
-        Object.setPrototypeOf(this, new.target.prototype) // restore Error prototype chain (best practice)
+        Object.setPrototypeOf(this, new.target.prototype) // restore Error prototype chain because javascript (best practice apparently)
     }
 }
 

@@ -58,6 +58,9 @@ function getIngredients(ingredient, date) { // get all the user-entered ingredie
                 alertUser(`"${storageAction('get', `txt-input${i}`)}" was entered without a date, and will not be displayed or matched`);
                 errorPrinter(e);
             }
+            else{
+                throw e
+            }
         }
     }
     if (ingredient) {return cleanPairs.keys()}
@@ -83,6 +86,7 @@ function makeElement(parentElem, classes, elemType) {
 
 
 /*// ToDo: make 'close matches' viewable:
+Match compare to global list of ingredient templates and match variations i.e., one missed letter.
 function matchString(query = '', searchString, wordMatch) {// returns A: type of match, if successful,
     // B: words matched, if wordMatch === true, or C: null if match fails
     let matches = [];

@@ -125,6 +125,13 @@ class UseByDate {
         // dates should be semi-formatted up to this point
         return date;
     }
+
+    /**
+     * Splits a date into it's component parts (d, m, y)
+     * Can be passed various format options of day, month and year
+     * @param date Date to be processed
+     * @returns {[string, string, string]} Date as an array of [year, month, day]
+     */
     splitDate(date) {
         let year;
         try {year = date.match(/\d{4}/)[0]} catch {year = null}
@@ -137,16 +144,16 @@ class UseByDate {
             date = date.match(/(\d\d)-(\d\d$)/);
             return [year, date[1], date[2]];
         }else { // the date is: dd/mm/yyyy
-            let oldDate = date
+            let arguedDate = date
             date = date.match(/(^\d\d)-(\d\d)/);
-            if (date === null) {throw new DateInvalidError(`The entered date (${oldDate}) is invalid and cannot be read. Is it in an accepted format?`);}
+            if (date === null) {throw new DateInvalidError(`The entered date (${arguedDate}) is invalid and cannot be read. Is it in an accepted format?`);}
             return [year, date[2], date[1]];
         }
 
     }
     /**
      * Checks that year is in the future, and returns the next valid year if the one entered is in the past.
-     * @param year four-digit year
+     * @param year (in format yyyy)
      * @returns {string} yyyy
      */
     validateYear(year) {
@@ -201,7 +208,9 @@ class UseByDate {
 
             case /02/.test(this.Month): // feb
                 if ((this.Year % 4) === 0) {
-                    if (this.Day > 29) {throw new DateInvalidError("don't you try an invalid Leap Year on me, it's 1am and i cant be bo")} // leap Year?
+                    if (parseInt(this.Day) === 28) {alertUser("don't try that invalid Leap Year shi on me bro I was born on one")}
+                    else if(this.Day > 29){throw new DateInvalidError("don't try that invalid Leap Year shi on me bro I was born on one")} // leap Year?
+
                 }
                 break;
 
@@ -213,10 +222,11 @@ class UseByDate {
 
     /**
      *
-     * @param {int} num The month number.
+     * @param {int|string} num The month number.
      * @returns {string} The name correlated with the month number.
      */
     monthName(num){
+        num = parseInt(num)
         if (num < 1 || num > 12) {throw new Error('The argued month number in monthName is beyond the bounds of accepted values (1 - 12)')}
         let months = ['Month0', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August',
             'September', 'October', 'November', 'December'];
@@ -227,11 +237,8 @@ class UseByDate {
 
 //region ************** OBJECTS ************** //
 
-let userError
 
-
-
-//Recipes
+//ToDo: Recipes
 const nachos = new Recipe('Nachos',
     ['corn chips', 'red kidney beans'],
     ['tomato passata|tomato paste']);

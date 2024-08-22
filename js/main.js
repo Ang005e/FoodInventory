@@ -73,87 +73,91 @@ function focusListener(elem) {
 
 
 function keypressEvent(event) {
-
-    if (event.target.className !== 'txt-bulk') {event.preventDefault()}
-
-    if (event.target.id === 'btn-add-input') {
-        storeInputValue(event, document.querySelector(`#txt-input${inputCount('current')}`));
-        return createInput(inputCount() + 1);
-    }
-
-    // Bulk input hotkey:
-    if (event.key === 'Enter' && event.shiftKey) { // shift + enter
-        event.preventDefault();
-
-        let date = (event.target === document.querySelector('#txt-bulk-date'));
-
-        if (event.target.id === 'txt-bulk-ingredient') {
-            storeBulkInput('store', event.target.value, date);
-            document.querySelector('#txt-bulk-date').focus();
-            return;
-        } else if (event.target.id === 'txt-bulk-date') {
-            storeBulkInput('store', event.target.value, date);
-            storeBulkInput('combine', event.target.value, date);
-            document.querySelector('#txt-bulk-ingredient').focus();
-            return;
+    try {
+        if (event.target.className !== 'txt-bulk') {event.preventDefault()}
+        if (event.target.id === 'btn-add-input') {
+            storeInputValue(event, document.querySelector(`#txt-input${inputCount('current')}`));
+            return createInput(inputCount() + 1);
         }
-        document.querySelector('#txt-bulk-ingredient').focus();
-        return
-    }
 
-    // must be the enter key used on an ingredient/date field or btn-add-input, so:
+        // Bulk input hotkey:
+        if (event.key === 'Enter' && event.shiftKey) { // shift + enter
+            event.preventDefault();
 
-    if (event.target.className === 'txt-bulk') {return}
+            let date = (event.target === document.querySelector('#txt-bulk-date'));
 
-    storeInputValue(event, event.target);
-}
-function saveInput(event) {
-
-    let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
-    let skipCreation = false;
-
-    switch (event.target.id) {
-        case 'btn-add-input':
-            if (valueEmpty(elem) || valueEmpty(elem.id)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
-                createInput(inputCount() + 1);
-                console.log('element identified as null value - no elements should be on screen.')
+            if (event.target.id === 'txt-bulk-ingredient') {
+                storeBulkInput('store', event.target.value, date);
+                document.querySelector('#txt-bulk-date').focus();
+                return;
+            } else if (event.target.id === 'txt-bulk-date') {
+                storeBulkInput('store', event.target.value, date);
+                storeBulkInput('combine', event.target.value, date);
+                document.querySelector('#txt-bulk-ingredient').focus();
                 return;
             }
-            storeInputValue(event, elem);
-            break;
+            document.querySelector('#txt-bulk-ingredient').focus();
+            return
+        }
 
-        case 'btn-remove-input':
-            try {removeInputPair(_focusedElem);}
-            catch {removeInputPair(elem)}
-            return;
+        // must be the enter key used on an ingredient/date field or btn-add-input, so:
 
-        case 'btn-remove-all':
-            storageAction('clear_all', undefined);
-            inputCount('none', true);
-            removeAllInputs();
-            return;
+        if (event.target.className === 'txt-bulk') {return}
 
-        case 'btn-continue':
-            let currentElems = inputCount('current', false);
-            if (!isEven(currentElems)) { // if an elem isn't paired...
-                let unpairedElem = document.querySelector(`#txt-input${currentElems}`);
-                if (valueEmpty(unpairedElem.value)) { // if it's empty, just remove it
-                    unpairedElem.remove();
-                } else { // otherwise, warn the user so they don't lose the value
-                    alertUser(`"${unpairedElem.value}" was entered without a date. please add one before continuing.`);
+        storeInputValue(event, event.target);
+    }catch (e) {
+        errorCentre(e)
+    }
+}
+function saveInput(event) {
+    try {
+        let elem = document.querySelector(`#txt-input${inputCount('current', false)}`) // retrives the most recently created elem, to use if there is no focused elem.
+        let skipCreation = false;
+
+        switch (event.target.id) {
+            case 'btn-add-input':
+                if (valueEmpty(elem) || valueEmpty(elem.id)) { // Check if there's no input element selected (i.e. first 'addIngredient' click after loading page, no single-input elements will be present)
+                    createInput(inputCount() + 1);
+                    console.log('element identified as null value - no elements should be on screen.')
                     return;
                 }
-            } else {
                 storeInputValue(event, elem);
-            }
+                break;
 
-            skipCreation = true;
-            location.href = 'inventory.html';
-            return;
+            case 'btn-remove-input':
+                try {removeInputPair(_focusedElem);}
+                catch {removeInputPair(elem)}
+                return;
+
+            case 'btn-remove-all':
+                storageAction('clear_all', undefined);
+                inputCount('none', true);
+                removeAllInputs();
+                return;
+
+            case 'btn-continue':
+                let currentElems = inputCount('current', false);
+                if (!isEven(currentElems)) { // if an elem isn't paired...
+                    let unpairedElem = document.querySelector(`#txt-input${currentElems}`);
+                    if (valueEmpty(unpairedElem.value)) { // if it's empty, just remove it
+                        unpairedElem.remove();
+                    } else { // otherwise, warn the user so they don't lose the value
+                        alertUser(`"${unpairedElem.value}" was entered without a date. please add one before continuing.`);
+                        return;
+                    }
+                } else {
+                    storeInputValue(event, elem);
+                }
+
+                skipCreation = true;
+                location.href = 'inventory.html';
+                return;
+        }
+        // once the above has been completed, create the new element
+        (skipCreation === false) && (createInput(inputCount() + 1))
+    }catch (e) {
+        errorCentre(e)
     }
-    // once the above has been completed, create the new element
-    (skipCreation === false) && (createInput(inputCount() + 1))
-
 }
 
 //endregion
@@ -330,8 +334,7 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
     // Guard clauses:
     if (inputCount('current') === 0) {return}
     if (valueEmpty(event.target.value) && valueEmpty(elem.value)) {
-
-        throw new Error('Provided value is not of the correct format')
+        throw new DateInvalidError(`Date is not in the correct format`)
     }
 
     if (elem instanceof NodeList) { // elem has been passed in as a nodelist? do:
@@ -347,7 +350,13 @@ function storeInputValue(event, elem) { // takes an event and an elem as argumen
 
 }
 
-function storeBulkInput(action, string = '', date) { // stores/retrives the bulk-input and bulk-date items from localStorage.
+/**
+ * Stores/retrives bulk-input and bulk-date items from localStorage.
+ * @param action Storage actiont to take
+ * @param string
+ * @param date
+ */
+function storeBulkInput(action, string = '', date) {
 
     if (valueEmpty(string)) {return}
     let list = string.split('\n')
@@ -456,7 +465,7 @@ function shuffleIdIndex() { // fixes gaps in the id indexing of each input eleme
 //endregion
 
 
-//region ************* Mini helpers *************
+//region ************* Misc helpers *************
 
 /**
  * The `getIdIndex()` function searches for a valid index value within the `id` property of an {@link`Element`}.
@@ -494,22 +503,25 @@ function valueEmpty(value) {
             return false;
     }
 }
-function isEven(value) {
+
+function isEven(value) { // remainder comparator
     parseInt(value);
     return value % 2 === 0;
-} // remainder comparator helper function
+}
 
-function loadedPageName(page) {
+function loadedPageName(page) { // returns the name of the loaded page's HTML file
     return document.location.pathname.includes(`${page}.html`);
 }
-function errorCentre(errorObj) {
 
+function errorCentre(errorObj) {
     if (errorObj instanceof DateInvalidError) {
         alertUser('Date Error: ' + errorObj.message)
     }else{
         errorPrinter(errorObj)
+        throw errorObj
     }
 }
+
 function errorPrinter(e) { // lazy programming, aka modularity
     let startPos;
     startPos = e.stack.substring(e.stack.search(/at /g) + 3) // finds the starting index of the first function in the stack
